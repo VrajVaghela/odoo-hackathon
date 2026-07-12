@@ -52,7 +52,7 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 - [x] CSV export is correct and downloaded locally.
 - [x] State-changing actions create audit records.
 
-Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Frontend Phase 2 screens (dashboard, vehicles, drivers, trips) are built against the live API with role-aware navigation and a no-permission screen. Remaining Phase 3 work is finance-owned: fuel/expense persistence, the fuel-efficiency/operational-cost/ROI reports, and CSV export (the Maintenance, Fuel & Expenses, and Analytics screens are still placeholders). Defect D4-P2-001 (dashboard client aggregates role-restricted registry endpoints instead of `/api/v1/dashboard`) remains open.
+Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Teammate 4 finance/reporting is complete: fuel and expense persistence, fuel-efficiency/operational-cost/ROI reporting, CSV export, and Financial Analyst fuel/expense and analytics screens are live at `/api/v1/finance` and `/api/v1/reports`. Defect D4-P2-001 (the Dispatcher dashboard aggregates role-restricted registry endpoints instead of `/api/v1/dashboard`) remains open.
 
 ## Phase 4 - Quality gates
 
