@@ -64,8 +64,10 @@ Verification note (2026-07-12): Maintenance open/close transactions are implemen
 - [ ] Registry screens handle loading, empty, error, and no-results states.
 - [ ] Desktop, tablet, and mobile layouts are reviewed.
 - [ ] Keyboard, focus, label, and contrast checks pass.
-- [ ] Mandatory business-rule tests pass.
+- [x] Mandatory business-rule tests pass.
 - [ ] Fresh migration + seed + complete demo flow pass.
+
+Verification note (2026-07-12): Teammate 3 Phase 4 mandatory business-rule matrix was run against a reset MySQL seed before and after integration verification. `npm run test --workspace=apps/api` passed 20/20 both times, covering dispatch rejection/success rules, lifecycle completion/cancellation, maintenance open/close, RBAC-adjacent integration checks, and audit assertions.
 
 ## Phase 5 - Submission and demo
 
