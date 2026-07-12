@@ -74,6 +74,7 @@ async function main() {
       { id: 2, code: 'DISPATCHER', label: 'Dispatcher' },
       { id: 3, code: 'SAFETY_OFFICER', label: 'Safety Officer' },
       { id: 4, code: 'FINANCIAL_ANALYST', label: 'Financial Analyst' },
+      { id: 5, code: 'ADMIN', label: 'Administrator' },
     ];
     for (const r of roles) {
       await connection.query(
@@ -90,6 +91,7 @@ async function main() {
       { role_id: 2, email: 'dispatcher@transitops.com', password_hash: passwordHash },
       { role_id: 3, email: 'safety@transitops.com', password_hash: passwordHash },
       { role_id: 4, email: 'finance@transitops.com', password_hash: passwordHash },
+      { role_id: 5, email: 'admin@transitops.com', password_hash: passwordHash },
     ];
     for (const u of users) {
       await connection.query(

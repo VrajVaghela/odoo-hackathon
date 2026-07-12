@@ -29,6 +29,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
 
   const demoAccounts = [
+    { label: 'Admin', email: 'admin@transitops.com', role: 'ADMIN' },
     { label: 'Fleet Manager', email: 'manager@transitops.com', role: 'FLEET_MANAGER' },
     { label: 'Dispatcher', email: 'dispatcher@transitops.com', role: 'DISPATCHER' },
     { label: 'Safety Officer', email: 'safety@transitops.com', role: 'SAFETY_OFFICER' },

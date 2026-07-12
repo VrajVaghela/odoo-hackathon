@@ -8,6 +8,7 @@ import { TripsPage } from './features/trips/TripsPage.tsx';
 import { MaintenancePage } from './features/maintenance/MaintenancePage.tsx';
 import { FinancePage } from './features/finance/FinancePage.tsx';
 import { ReportsPage } from './features/reports/ReportsPage.tsx';
+import { UsersPage } from './features/users/UsersPage.tsx';
 import { PageHeader } from './components/PageHeader.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 
@@ -25,11 +26,13 @@ const ROLE_PAGES: Record<string, string[]> = {
   DISPATCHER: ['dashboard', 'trips'],
   SAFETY_OFFICER: ['drivers'],
   FINANCIAL_ANALYST: ['finance', 'reports'],
+  ADMIN: ['dashboard', 'vehicles', 'drivers', 'trips', 'maintenance', 'finance', 'reports', 'users'],
 };
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserSession | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [confirmState, setConfirmState] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
 
   // Load session from backend /api/v1/auth/me on mount to sync with cookie (important for OAuth redirect)
   useEffect(() => {
@@ -96,6 +99,66 @@ const App: React.FC = () => {
       localStorage.removeItem('transitops_session');
     }
   };
+
+  // Handle invitation confirmation page (public, before login check)
+  const confirmToken = new URLSearchParams(window.location.search).get('confirm');
+  if (confirmToken && confirmState.status === 'idle') {
+    setConfirmState({ status: 'loading', message: 'Activating your account...' });
+    fetch(`/api/v1/users/confirm/${confirmToken}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (res.ok) {
+          setConfirmState({ status: 'success', message: `Account activated for ${data.data?.email || 'your email'}! You can now log in.` });
+        } else {
+          setConfirmState({ status: 'error', message: data?.error?.message || 'Failed to activate account.' });
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+      })
+      .catch(() => {
+        setConfirmState({ status: 'error', message: 'Network error. Please try again.' });
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+  }
+
+  if (confirmState.status !== 'idle') {
+    const isSuccess = confirmState.status === 'success';
+    const pageStyle: React.CSSProperties = {
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', backgroundColor: 'var(--color-canvas)', padding: 'var(--space-4)',
+    };
+    const cardStyle: React.CSSProperties = {
+      maxWidth: '440px', width: '100%', padding: 'var(--space-8)',
+      backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-md)', textAlign: 'center',
+    };
+    return (
+      <div style={pageStyle}>
+        <div style={cardStyle}>
+          <span style={{ fontSize: '3rem' }}>{confirmState.status === 'loading' ? '⏳' : isSuccess ? '🎉' : '❌'}</span>
+          <h2 style={{ fontSize: 'var(--text-xl)', fontWeight: 800, color: 'var(--color-text)', margin: 'var(--space-4) 0 var(--space-2)' }}>
+            {confirmState.status === 'loading' ? 'Activating...' : isSuccess ? 'Account Activated!' : 'Activation Failed'}
+          </h2>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', lineHeight: 'var(--leading-normal)' }}>
+            {confirmState.message}
+          </p>
+          {confirmState.status !== 'loading' && (
+            <button
+              type="button"
+              onClick={() => { setConfirmState({ status: 'idle', message: '' }); window.location.href = '/'; }}
+              style={{
+                marginTop: 'var(--space-5)', height: 'var(--control-height)', padding: '0 var(--space-5)',
+                backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-contrast)',
+                border: 'none', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)',
+                fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Go to Login
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Center page for login
   if (!user) {
@@ -204,6 +267,9 @@ const App: React.FC = () => {
 
       case 'reports':
         return <ReportsPage />;
+
+      case 'users':
+        return <UsersPage />;
 
       default:
         return (

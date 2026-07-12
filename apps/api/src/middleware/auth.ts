@@ -93,6 +93,12 @@ export function requireRole(allowedRoles: string[]) {
       return;
     }
 
+    // ADMIN is a superrole that bypasses all role restrictions
+    if (req.user.role === 'ADMIN') {
+      next();
+      return;
+    }
+
     if (!allowedRoles.includes(req.user.role)) {
       next(new AuthorizationError(`Access denied. Role ${req.user.role} is not permitted.`));
       return;

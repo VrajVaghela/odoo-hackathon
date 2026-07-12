@@ -538,7 +538,7 @@ export const TripsPage: React.FC<TripsPageProps> = ({ userRole }) => {
   const [statusFilter, setStatusFilter] = useState('');
   const [successToast, setSuccessToast] = useState<string | null>(null);
 
-  const isDispatcher = userRole === 'DISPATCHER';
+  const isDispatcher = userRole === 'DISPATCHER' || userRole === 'ADMIN';
 
   const loadTrips = useCallback(async () => {
     setLoading(true);

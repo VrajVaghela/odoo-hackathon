@@ -9,6 +9,7 @@ import dashboardRouter from './modules/dashboard/routes.js';
 import maintenanceRouter from './modules/maintenance/routes.js';
 import financeRouter from './modules/finance/routes.js';
 import reportsRouter from './modules/reports/routes.js';
+import usersRouter from './modules/users/routes.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/v1/dashboard', dashboardRouter);
 app.use('/api/v1/maintenance', maintenanceRouter);
 app.use('/api/v1/finance', financeRouter);
 app.use('/api/v1/reports', reportsRouter);
+app.use('/api/v1/users', usersRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (_req, res) => {

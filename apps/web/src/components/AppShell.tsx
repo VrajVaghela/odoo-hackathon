@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type RoleType = 'FLEET_MANAGER' | 'DISPATCHER' | 'SAFETY_OFFICER' | 'FINANCIAL_ANALYST';
+export type RoleType = 'FLEET_MANAGER' | 'DISPATCHER' | 'SAFETY_OFFICER' | 'FINANCIAL_ANALYST' | 'ADMIN';
 
 interface NavItem {
   id: string;
@@ -35,16 +35,20 @@ export const AppShell: React.FC<AppShellProps> = ({
     { id: 'maintenance', label: 'Maintenance', icon: '🔧', roles: ['FLEET_MANAGER'] },
     { id: 'finance', label: 'Fuel & Expenses', icon: '💰', roles: ['FINANCIAL_ANALYST'] },
     { id: 'reports', label: 'Analytics', icon: '📈', roles: ['FINANCIAL_ANALYST'] },
+    { id: 'users', label: 'User Management', icon: '👥', roles: ['ADMIN'] },
   ];
 
-  // Filter nav items based on user role
-  const visibleNavItems = navigationItems.filter(item => item.roles.includes(userRole));
+  // Filter nav items based on user role (ADMIN sees all items)
+  const visibleNavItems = userRole === 'ADMIN'
+    ? navigationItems
+    : navigationItems.filter(item => item.roles.includes(userRole));
 
   const roleLabels: Record<RoleType, string> = {
     FLEET_MANAGER: 'Fleet Manager',
     DISPATCHER: 'Dispatcher',
     SAFETY_OFFICER: 'Safety Officer',
     FINANCIAL_ANALYST: 'Financial Analyst',
+    ADMIN: 'Administrator',
   };
 
   const handleNavClick = (pageId: string) => {
