@@ -25,7 +25,6 @@ export const AppShell: React.FC<AppShellProps> = ({
   children,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [useTiDB, setUseTiDB] = useState(false);
   const userRole = user.role as RoleType;
 
   const navigationItems: NavItem[] = [
@@ -333,23 +332,6 @@ export const AppShell: React.FC<AppShellProps> = ({
               </h1>
             </div>
             <div className="appshell-mobile-status" style={{ alignItems: 'center', gap: 'var(--space-4)' }}>
-              <button
-                type="button"
-                onClick={() => setUseTiDB((prev) => !prev)}
-                title="Toggle database backend display"
-                style={{
-                  fontSize: 'var(--text-xs)',
-                  fontWeight: 700,
-                  color: useTiDB ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  border: `1px solid ${useTiDB ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '2px 8px',
-                  backgroundColor: 'transparent',
-                  cursor: 'pointer',
-                }}
-              >
-                {useTiDB ? '⚡ Powered by TiDB' : 'DB: MySQL'}
-              </button>
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
                 Server Connected
               </span>
