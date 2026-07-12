@@ -5,6 +5,7 @@ import { DashboardPage } from './features/dashboard/DashboardPage.tsx';
 import { VehiclesPage } from './features/vehicles/VehiclesPage.tsx';
 import { DriversPage } from './features/drivers/DriversPage.tsx';
 import { TripsPage } from './features/trips/TripsPage.tsx';
+import { MaintenancePage } from './features/maintenance/MaintenancePage.tsx';
 import { PageHeader } from './components/PageHeader.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 
@@ -165,19 +166,7 @@ const App: React.FC = () => {
         return <TripsPage userRole={user.role} />;
 
       case 'maintenance':
-        return (
-          <div style={containerStyle}>
-            <PageHeader
-              title="Maintenance Logs"
-              description="Track shop orders, mechanical issues, and maintenance schedules."
-            />
-            <EmptyState
-              icon="🔧"
-              title="Coming in Phase 3"
-              description="Maintenance logging and shop status tracking will be available once Phase 3 is completed."
-            />
-          </div>
-        );
+        return <MaintenancePage />;
 
       case 'finance':
         return (

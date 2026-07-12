@@ -42,7 +42,7 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 - [x] Implement dispatched-trip cancellation and safe availability restore.
 - [x] Implement open-maintenance transaction and In Shop transition.
 - [x] Implement close-maintenance transaction and conditional Available restore.
-- [ ] Build maintenance log/form/status experience.
+- [x] Build maintenance log/form/status experience.
 - [x] Add audit events through Teammate 1 helper.
 
 Progress note (2026-07-12): Trip completion/cancellation and both maintenance transactions are implemented with row locks and audit events; the maintenance router is registered at `/api/v1/maintenance` (list, get, open, close). The maintenance feature UI is still outstanding — the frontend Maintenance screen remains a placeholder pending this handoff.
