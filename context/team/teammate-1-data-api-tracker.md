@@ -1,0 +1,62 @@
+# Teammate 1 - Data and API Foundation Tracker
+
+Owner name: ____________________  
+Branch: feat/data-api  
+Status: Not started / In progress / Blocked / Ready for integration  
+Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard read model, and integration of shared route registration.
+
+## Definition of done
+
+- Fresh migration and seed work on another teammate machine.
+- API returns typed, safe, consistent errors.
+- All owned writes are parameterised, indexed where needed, and auditable.
+- Handoff includes endpoint contract, seed assumptions, test result, and tracker update.
+
+## Phase 0 - 00:00-00:25
+
+- [ ] Review project data model with all teammates.
+- [ ] Decide migration numbering and local environment variable names.
+- [ ] Publish Vehicle, Driver, Dashboard, and Auth request/response contracts.
+- [ ] Agree seeded account roles and safe local demo password process.
+
+## Phase 1 - 00:25-01:35
+
+- [ ] Create MySQL connection pool and transaction helper.
+- [ ] Create migrations for roles, users, sessions, vehicles, drivers, trips, maintenance logs, fuel logs, expenses, and audit logs.
+- [ ] Add foreign keys, unique constraints, checks, and the documented indexes.
+- [ ] Create deterministic seeds for roles, accounts, fleet assets, and drivers.
+- [ ] Implement health endpoint and central error middleware.
+- [ ] Implement password hash/verify, opaque session create/validate/destroy, and login attempt limiting.
+- [ ] Implement role middleware and current-user endpoint.
+
+## Phase 2 - 01:35-03:50
+
+- [ ] Implement vehicle repository/service/controller/routes.
+- [ ] Enforce unique normalised registration number and valid lifecycle changes.
+- [ ] Implement vehicle filters and paginated list query.
+- [ ] Implement driver repository/service/controller/routes.
+- [ ] Enforce unique licence number, score range, and valid status values.
+- [ ] Implement available-resource query contract for Teammate 3.
+- [ ] Implement dashboard KPI and filtered status queries for Teammate 2.
+
+## Phase 3 - 03:50-05:35
+
+- [ ] Add audit-log helper usable by all state-changing services.
+- [ ] Validate dashboard query count and index use.
+- [ ] Integrate agreed route registrations from Teammates 3 and 4.
+- [ ] Support dashboard refresh data after trip, maintenance, and finance mutations.
+
+## Phase 4 - 05:35-06:45
+
+- [ ] Confirm every SQL query uses placeholders.
+- [ ] Confirm sensitive routes use authentication and correct role middleware.
+- [ ] Review session expiry, cookie flags, and safe error responses.
+- [ ] Check dashboard/registry queries against index plan.
+- [ ] Help reproduce and fix integration blockers without changing another owner's rule logic.
+
+## Handoff checklist
+
+- [ ] Share migration/seed command.
+- [ ] Share seed data IDs/codes that frontend uses only through API.
+- [ ] Share endpoint examples and errors with Teammates 2, 3, and 4.
+- [ ] Update shared progress tracker.
