@@ -1,22 +1,31 @@
-﻿# odoo-hackathon
-# TransitOps – Smart Transport Operations Platform
+﻿# TransitOps – Smart Transport Operations Platform
 
 ## Overview
 
-TransitOps is a modern Transport Operations ERP designed to streamline fleet management for logistics and transportation organizations. The platform centralizes vehicle, driver, trip, maintenance, fuel, expense, and operational data into a single role-based system, enabling organizations to efficiently manage daily transport operations while improving visibility, compliance, and decision-making.
+TransitOps is a transport operations platform built for the hackathon challenge to digitize fleet management workflows for logistics organizations. It brings together vehicle registration, driver management, trip dispatching, maintenance tracking, fuel and expense logging, and analytics into one centralized system.
 
-The system supports multiple organizational roles—including **Admin**, **Fleet Manager**, **Dispatcher**, **Safety Officer**, and **Financial Analyst**—with secure Role-Based Access Control (RBAC), ensuring each user has access only to the features relevant to their responsibilities.
+The platform is designed for roles such as Fleet Manager, Driver, Safety Officer, and Financial Analyst, with secure authentication and role-based access control to ensure the right users see the right data.
 
 ## Key Features
 
-- Secure Authentication & Role-Based Access Control (RBAC)
-- Vehicle Registry & Lifecycle Management
-- Driver Management & License Monitoring
-- Trip Dispatching with Business Rule Validation
-- Maintenance Workflow & Vehicle Status Tracking
-- Fuel & Expense Management
-- Real-time Dashboard with KPIs and Analytics
-- Operational Reports and Insights
+- Secure authentication and role-based access control
+- Vehicle registry and lifecycle management
+- Driver profiles with license and safety tracking
+- Trip creation and dispatching with validation rules
+- Maintenance workflow with automatic vehicle status updates
+- Fuel and expense tracking
+- Dashboard KPIs and operational analytics
+- Reports with export support
+
+## Functional Scope
+
+The solution focuses on core transport operations use cases, including:
+
+- Managing vehicles with statuses such as Available, On Trip, In Shop, and Retired
+- Managing drivers with license validity and compliance checks
+- Creating and tracking trips with business-rule validation
+- Recording maintenance activities and updating fleet availability
+- Monitoring fuel, costs, and fleet performance
 
 ## Tech Stack
 
@@ -26,4 +35,6 @@ The system supports multiple organizational roles—including **Admin**, **Fleet
 - **Authentication:** JWT
 - **Charts & Analytics:** Recharts
 
-TransitOps aims to replace manual spreadsheets and disconnected workflows with a centralized, scalable, and user-friendly transport management solution.
+## Goal
+
+TransitOps aims to replace manual spreadsheets and disconnected workflows with a scalable, modern platform that improves visibility, compliance, and operational efficiency.
