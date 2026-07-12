@@ -2,7 +2,7 @@
 
 Owner name: ____________________  
 Branch: feat/frontend-shell  
-Status: Not started / In progress / Blocked / Ready for integration  
+Status: Ready for integration  
 Primary responsibility: tokenised design system, responsive app shell, login, dashboard, vehicle/driver UI, and shared components.
 
 ## Definition of done
@@ -28,17 +28,19 @@ Primary responsibility: tokenised design system, responsive app shell, login, da
 
 ## Phase 2 - 01:35-03:50
 
-- [ ] Build dashboard KPI/filter/recent-trips/vehicle-status layout from API contract.
-- [ ] Build vehicle registry with filters, responsive table/card treatment, add/edit form, and duplicate error feedback.
-- [ ] Build driver registry and compliance indicators for licence expiry/suspension.
-- [ ] Implement role-aware page navigation and no-permission screen.
-- [ ] Test desktop and mobile layout with seeded data.
+- [x] Build dashboard KPI/filter/recent-trips/vehicle-status layout from API contract.
+- [x] Build vehicle registry with filters, responsive table/card treatment, add/edit form, and duplicate error feedback.
+- [x] Build driver registry and compliance indicators for licence expiry/suspension.
+- [x] Implement role-aware page navigation and no-permission screen.
+- [x] Test desktop and mobile layout with seeded data.
 
 ## Phase 3 - 03:50-05:35
 
 - [ ] Integrate shared form/modal/status primitives with trip and maintenance feature components from Teammate 3.
-- [ ] Keep dashboard/registry data refreshed after mutations.
+- [x] Keep dashboard/registry data refreshed after mutations.
 - [ ] Polish high-signal visual details: spacing, hierarchy, table readability, semantic chips, and empty states.
+
+Progress note (2026-07-12): Phase 2 screens are complete and consuming the live API. Trip feature components are integrated in TripsPage; the maintenance feature UI is still a placeholder (blocked on Teammate 3 maintenance screen handoff), so the trip/maintenance integration item stays open.
 
 ## Phase 4 - 05:35-06:45
 

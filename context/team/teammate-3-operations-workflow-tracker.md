@@ -2,7 +2,7 @@
 
 Owner name: ____________________  
 Branch: feat/trips-maintenance  
-Status: Not started / In progress / Blocked / Ready for integration  
+Status: In progress  
 Primary responsibility: trip state machine, dispatch business rules, maintenance workflow, transaction tests, and trip/maintenance feature UI.
 
 ## Definition of done
@@ -40,10 +40,12 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 
 - [x] Implement trip completion with actual distance/odometer validation.
 - [x] Implement dispatched-trip cancellation and safe availability restore.
-- [ ] Implement open-maintenance transaction and In Shop transition.
-- [ ] Implement close-maintenance transaction and conditional Available restore.
+- [x] Implement open-maintenance transaction and In Shop transition.
+- [x] Implement close-maintenance transaction and conditional Available restore.
 - [ ] Build maintenance log/form/status experience.
-- [ ] Add audit events through Teammate 1 helper.
+- [x] Add audit events through Teammate 1 helper.
+
+Progress note (2026-07-12): Trip completion/cancellation and both maintenance transactions are implemented with row locks and audit events; the maintenance router is registered at `/api/v1/maintenance` (list, get, open, close). The maintenance feature UI is still outstanding — the frontend Maintenance screen remains a placeholder pending this handoff.
 
 ## Phase 4 - 05:35-06:45
 
