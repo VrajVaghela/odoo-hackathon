@@ -96,6 +96,17 @@ interface DashboardApiResponse {
     fleetUtilization: {
       value: string;
     };
+    totalVehicles?: number;
+    availableVehicles?: number;
+    onTripVehicles?: number;
+    inShopVehicles?: number;
+    retiredVehicles?: number;
+    totalDrivers?: number;
+    availableDriversCount?: number;
+    activeTrips?: number;
+    draftTrips?: number;
+    completedTrips?: number;
+    fleetUtilisation?: number;
   };
   activeTrips: DashboardApiTrip[];
 }
@@ -122,17 +133,17 @@ function mapDashboardResponse(data: DashboardApiResponse): DashboardData {
 
   return {
     kpis: {
-      totalVehicles: activeVehicles.total,
-      availableVehicles: activeVehicles.available,
-      onTripVehicles: activeVehicles.onTrip,
-      inShopVehicles: activeVehicles.inShop,
-      retiredVehicles: 0,
-      totalDrivers: availableDrivers.total,
-      availableDrivers: availableDrivers.total,
-      activeTrips,
-      draftTrips: pendingDispatches.total,
-      completedTrips,
-      fleetUtilisation: parsePercent(fleetUtilization.value),
+      totalVehicles: data.kpis.totalVehicles ?? activeVehicles.total,
+      availableVehicles: data.kpis.availableVehicles ?? activeVehicles.available,
+      onTripVehicles: data.kpis.onTripVehicles ?? activeVehicles.onTrip,
+      inShopVehicles: data.kpis.inShopVehicles ?? activeVehicles.inShop,
+      retiredVehicles: data.kpis.retiredVehicles ?? 0,
+      totalDrivers: data.kpis.totalDrivers ?? availableDrivers.total,
+      availableDrivers: data.kpis.availableDriversCount ?? availableDrivers.total,
+      activeTrips: data.kpis.activeTrips ?? activeTrips,
+      draftTrips: data.kpis.draftTrips ?? pendingDispatches.total,
+      completedTrips: data.kpis.completedTrips ?? completedTrips,
+      fleetUtilisation: data.kpis.fleetUtilisation ?? parsePercent(fleetUtilization.value),
     },
     recentTrips: data.activeTrips.slice(0, 10).map((trip) => ({
       id: trip.id,
@@ -142,12 +153,13 @@ function mapDashboardResponse(data: DashboardApiResponse): DashboardData {
       vehicle_reg: trip.vehicle_registration_number || trip.vehicle_name || '-',
       driver_name: trip.driver_name || '-',
       status: trip.status,
-      cargo_weight_kg: trip.cargo_weight_kg,
+      cargo_weight_kg: Number(trip.cargo_weight_kg),
     })),
     statusCounts: [
-      { status: 'AVAILABLE', count: activeVehicles.available },
-      { status: 'ON_TRIP', count: activeVehicles.onTrip },
-      { status: 'IN_SHOP', count: activeVehicles.inShop },
+      { status: 'AVAILABLE', count: data.kpis.availableVehicles ?? activeVehicles.available },
+      { status: 'ON_TRIP', count: data.kpis.onTripVehicles ?? activeVehicles.onTrip },
+      { status: 'IN_SHOP', count: data.kpis.inShopVehicles ?? activeVehicles.inShop },
+      { status: 'RETIRED', count: data.kpis.retiredVehicles ?? 0 },
     ].filter((item) => item.count > 0),
   };
 }

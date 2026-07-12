@@ -2,7 +2,8 @@
 
 ## D4-P2-001 - Dispatcher dashboard aggregates inaccessible registry endpoints
 
-- **Status:** Open - assign to Teammate 2 / Teammate 1 integration.
+- **Status:** Resolved
+- **Resolution Note:** Calculated/aggregated vehicles, drivers, and trips metrics in the backend and returned them in a unified format via `/api/v1/dashboard`. Modified `dashboardApi.ts` on the frontend to fetch from `/api/v1/dashboard` directly, eliminating the 403 Forbidden errors for Dispatchers.
 - **Precondition:** Sign in as the seeded Dispatcher account and navigate to Dashboard.
 - **Steps:**
   1. Load the dashboard as `dispatcher@transitops.com`.
