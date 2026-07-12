@@ -14,10 +14,10 @@ Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard
 
 ## Phase 0 - 00:00-00:25
 
-- [ ] Review project data model with all teammates.
-- [ ] Decide migration numbering and local environment variable names.
-- [ ] Publish Vehicle, Driver, Dashboard, and Auth request/response contracts.
-- [ ] Agree seeded account roles and safe local demo password process.
+- [x] Review project data model with all teammates.
+- [x] Decide migration numbering and local environment variable names.
+- [x] Publish Vehicle, Driver, Dashboard, and Auth request/response contracts.
+- [x] Agree seeded account roles and safe local demo password process.
 
 ## Phase 1 - 00:25-01:35
 

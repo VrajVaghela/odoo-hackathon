@@ -14,9 +14,9 @@ Primary responsibility: tokenised design system, responsive app shell, login, da
 
 ## Phase 0 - 00:00-00:25
 
-- [ ] Review mockup sections and identify reusable primitives.
-- [ ] Confirm API response contract and global error shape with Teammate 1.
-- [ ] Lock text/status treatment from ui_tokens.md and ui_rules.md.
+- [x] Review mockup sections and identify reusable primitives.
+- [x] Confirm API response contract and global error shape with Teammate 1.
+- [x] Lock text/status treatment from ui_tokens.md and ui_rules.md.
 
 ## Phase 1 - 00:25-01:35
 

@@ -14,9 +14,9 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 
 ## Phase 0 - 00:00-00:25
 
-- [ ] Convert every mandatory rule into a failing/passing test case.
-- [ ] Agree available-resource contract with Teammate 1.
-- [ ] Agree trip/maintenance feature component boundaries with Teammate 2.
+- [x] Convert every mandatory rule into a failing/passing test case.
+- [x] Agree available-resource contract with Teammate 1.
+- [x] Agree trip/maintenance feature component boundaries with Teammate 2.
 
 ## Phase 1 - 00:25-01:35
 
