@@ -340,12 +340,8 @@ const MaintenanceLogCard: React.FC<MaintenanceLogCardProps> = ({
   const isActive = log.status === 'ACTIVE';
   const vehicleName = log.vehicle_reg || `Vehicle #${log.vehicle_id}`;
 
-<<<<<<< HEAD
   const handleConfirmClose = async () => {
-=======
-  const handleClose = async () => {
     if (pending) return;
->>>>>>> e93cde4 (feat: harden trip lifecycle and UI guards)
     setError(null);
     const parsedCost = Number(cost);
     if (cost === '' || !Number.isFinite(parsedCost) || parsedCost < 0) {
