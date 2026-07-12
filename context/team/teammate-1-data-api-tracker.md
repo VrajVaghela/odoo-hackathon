@@ -1,8 +1,8 @@
 # Teammate 1 - Data and API Foundation Tracker
 
-Owner name: ____________________  
+Owner name: Antigravity (Teammate 1)  
 Branch: feat/data-api  
-Status: Not started / In progress / Blocked / Ready for integration  
+Status: Ready for integration  
 Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard read model, and integration of shared route registration.
 
 ## Definition of done
@@ -31,13 +31,13 @@ Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard
 
 ## Phase 2 - 01:35-03:50
 
-- [ ] Implement vehicle repository/service/controller/routes.
-- [ ] Enforce unique normalised registration number and valid lifecycle changes.
-- [ ] Implement vehicle filters and paginated list query.
-- [ ] Implement driver repository/service/controller/routes.
-- [ ] Enforce unique licence number, score range, and valid status values.
-- [ ] Implement available-resource query contract for Teammate 3.
-- [ ] Implement dashboard KPI and filtered status queries for Teammate 2.
+- [x] Implement vehicle repository/service/controller/routes.
+- [x] Enforce unique normalised registration number and valid lifecycle changes.
+- [x] Implement vehicle filters and paginated list query.
+- [x] Implement driver repository/service/controller/routes.
+- [x] Enforce unique licence number, score range, and valid status values.
+- [x] Implement available-resource query contract for Teammate 3.
+- [x] Implement dashboard KPI and filtered status queries for Teammate 2.
 
 ## Phase 3 - 03:50-05:35
 

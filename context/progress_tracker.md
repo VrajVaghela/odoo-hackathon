@@ -23,11 +23,11 @@ Rule: update this file and the relevant individual tracker immediately after a f
 
 ## Phase 2 - Operational core
 
-- [ ] Vehicle registry create/list/filter/edit works.
-- [ ] Registration uniqueness is enforced by MySQL and API.
-- [ ] Driver registry create/list/filter/edit works.
-- [ ] Licence expiry/suspended statuses are visible.
-- [ ] Dashboard KPI query and filters work.
+- [x] Vehicle registry create/list/filter/edit works.
+- [x] Registration uniqueness is enforced by MySQL and API.
+- [x] Driver registry create/list/filter/edit works.
+- [x] Licence expiry/suspended statuses are visible.
+- [x] Dashboard KPI query and filters work.
 - [x] Trip draft/create works.
 - [x] Capacity validation blocks invalid dispatch.
 - [x] Expired/suspended/unavailable driver validation blocks dispatch.
