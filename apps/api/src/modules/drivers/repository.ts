@@ -1,12 +1,14 @@
 import pool from '../../db/pool.js';
+import { PoolConnection } from 'mysql2/promise';
 import { Driver, CreateDriverInput, UpdateDriverInput, DriverFilters } from './types.js';
 
 export class DriverRepository {
   /**
    * Find driver by ID.
    */
-  async findById(id: number): Promise<Driver | null> {
-    const [rows] = await pool.query(
+  async findById(id: number, connection?: PoolConnection): Promise<Driver | null> {
+    const executor = connection || pool;
+    const [rows] = await executor.query(
       'SELECT id, full_name, licence_number, licence_category, licence_expiry_date, contact_number, safety_score, status FROM drivers WHERE id = ?',
       [id]
     );
@@ -17,8 +19,9 @@ export class DriverRepository {
   /**
    * Find driver by licence number.
    */
-  async findByLicenceNumber(licenceNum: string): Promise<Driver | null> {
-    const [rows] = await pool.query(
+  async findByLicenceNumber(licenceNum: string, connection?: PoolConnection): Promise<Driver | null> {
+    const executor = connection || pool;
+    const [rows] = await executor.query(
       'SELECT id, full_name, licence_number, licence_category, licence_expiry_date, contact_number, safety_score, status FROM drivers WHERE licence_number = ?',
       [licenceNum]
     );
@@ -29,11 +32,12 @@ export class DriverRepository {
   /**
    * Create a new driver.
    */
-  async create(input: CreateDriverInput): Promise<Driver> {
+  async create(input: CreateDriverInput, connection?: PoolConnection): Promise<Driver> {
     const status = input.status || 'AVAILABLE';
     const safetyScore = input.safety_score ?? 100.00;
 
-    const [result] = await pool.query(
+    const executor = connection || pool;
+    const [result] = await executor.query(
       `INSERT INTO drivers (full_name, licence_number, licence_category, licence_expiry_date, contact_number, safety_score, status)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -48,13 +52,13 @@ export class DriverRepository {
     );
 
     const insertId = (result as any).insertId;
-    return (await this.findById(insertId))!;
+    return (await this.findById(insertId, connection))!;
   }
 
   /**
    * Update an existing driver.
    */
-  async update(id: number, input: UpdateDriverInput): Promise<Driver> {
+  async update(id: number, input: UpdateDriverInput, connection?: PoolConnection): Promise<Driver> {
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -88,16 +92,17 @@ export class DriverRepository {
     }
 
     if (fields.length === 0) {
-      return (await this.findById(id))!;
+      return (await this.findById(id, connection))!;
     }
 
     values.push(id);
-    await pool.query(
+    const executor = connection || pool;
+    await executor.query(
       `UPDATE drivers SET ${fields.join(', ')} WHERE id = ?`,
       values
     );
 
-    return (await this.findById(id))!;
+    return (await this.findById(id, connection))!;
   }
 
   /**

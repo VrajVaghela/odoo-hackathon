@@ -228,8 +228,8 @@ export class TripService {
       const driverId = trip.driver_id!;
 
       // Lock vehicle and driver rows before updating
-      await repo.findVehicleForUpdate(conn, vehicleId);
-      await repo.findDriverForUpdate(conn, driverId);
+      const vehicle = await repo.findVehicleForUpdate(conn, vehicleId);
+      const driver = await repo.findDriverForUpdate(conn, driverId);
 
       const beforeTrip = { status: trip.status, actual_distance_km: trip.actual_distance_km };
       await repo.completeTrip(conn, tripId, vehicleId, driverId, actualKm);

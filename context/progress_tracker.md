@@ -39,10 +39,10 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 
 ## Phase 3 - Lifecycle and insight
 
-- [ ] Trip completion updates availability and actual trip data.
-- [ ] Trip cancellation restores availability safely.
-- [ ] Open maintenance sets vehicle to In Shop.
-- [ ] Close maintenance restores vehicle to Available unless retired.
+- [x] Trip completion updates availability and actual trip data.
+- [x] Trip cancellation restores availability safely.
+- [x] Open maintenance sets vehicle to In Shop.
+- [x] Close maintenance restores vehicle to Available unless retired.
 - [ ] Fuel logging persists liters, cost, date, vehicle, and optional trip.
 - [ ] Expense logging persists category, amount, date, vehicle/trip.
 - [ ] Dashboard refreshes after domain mutations.
@@ -50,7 +50,7 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 - [ ] Operational cost report derives from fuel, maintenance, and expense data.
 - [ ] ROI report derives from revenue, fuel, maintenance, and acquisition cost.
 - [ ] CSV export is correct and downloaded locally.
-- [ ] State-changing actions create audit records.
+- [x] State-changing actions create audit records.
 
 ## Phase 4 - Quality gates
 

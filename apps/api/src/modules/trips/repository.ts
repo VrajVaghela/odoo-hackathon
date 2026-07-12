@@ -55,9 +55,9 @@ export class TripRepository {
   async findVehicleForUpdate(
     connection: PoolConnection,
     vehicleId: number
-  ): Promise<{ id: number; status: string; max_capacity_kg: number; name: string; registration_number: string } | null> {
+  ): Promise<{ id: number; status: string; max_capacity_kg: number; name: string; registration_number: string; odometer_km: number } | null> {
     const [rows] = await connection.query<any[]>(
-      'SELECT id, status, max_capacity_kg, name, registration_number FROM vehicles WHERE id = ? FOR UPDATE',
+      'SELECT id, status, max_capacity_kg, name, registration_number, odometer_km FROM vehicles WHERE id = ? FOR UPDATE',
       [vehicleId]
     );
     return rows[0] ?? null;
@@ -161,7 +161,6 @@ export class TripRepository {
       );
     }
   }
-
 
   /**
    * Lists trips with optional status filter, ordered by most recent first.

@@ -400,5 +400,276 @@ test('Phase 2 API Integration Tests', async (t) => {
     }
   });
 
+  await t.test('Trips: Complete and Cancel trip workflow', async () => {
+    // 1. Create a DRAFT trip
+    const createRes = await fetch(`${baseUrl}/api/v1/trips`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        source: 'Warehouse A',
+        destination: 'Store B',
+        cargo_weight_kg: 500,
+        planned_distance_km: 100,
+        revenue: 1500,
+      }),
+    });
+    assert.strictEqual(createRes.status, 201);
+    const { trip } = await createRes.json();
+    const tripId = trip.id;
+
+    // Retrieve available vehicle and driver
+    const optRes = await fetch(`${baseUrl}/api/v1/trips/dispatch-options`, {
+      headers: { cookie: dispatcherCookie },
+    });
+    const options = await optRes.json();
+    const availableVehicle = options.vehicles[0];
+    const availableDriver = options.drivers.find(
+      (d: any) => new Date(d.licence_expiry_date) >= new Date()
+    );
+
+    assert.ok(availableVehicle, 'Should have an available vehicle');
+    assert.ok(availableDriver, 'Should have an available driver');
+
+    // 2. Dispatch the trip
+    const dispatchRes = await fetch(`${baseUrl}/api/v1/trips/${tripId}/dispatch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        vehicle_id: availableVehicle.id,
+        driver_id: availableDriver.id,
+      }),
+    });
+    assert.strictEqual(dispatchRes.status, 200);
+
+    // Verify resources are now ON_TRIP
+    const [vRowBefore] = await pool.query('SELECT status, odometer_km FROM vehicles WHERE id = ?', [availableVehicle.id]);
+    assert.strictEqual((vRowBefore as any[])[0].status, 'ON_TRIP');
+    const initialOdometer = Number((vRowBefore as any[])[0].odometer_km);
+
+    const [dRowBefore] = await pool.query('SELECT status FROM drivers WHERE id = ?', [availableDriver.id]);
+    assert.strictEqual((dRowBefore as any[])[0].status, 'ON_TRIP');
+
+    // 3. Try to complete the trip with invalid actual_distance_km
+    const completeFailRes = await fetch(`${baseUrl}/api/v1/trips/${tripId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        actual_distance_km: -10,
+      }),
+    });
+    assert.strictEqual(completeFailRes.status, 422);
+
+    // 4. Complete the trip with valid actual_distance_km
+    const completeRes = await fetch(`${baseUrl}/api/v1/trips/${tripId}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        actual_distance_km: 120,
+      }),
+    });
+    assert.strictEqual(completeRes.status, 200);
+    const completeBody = await completeRes.json();
+    assert.strictEqual(completeBody.trip.status, 'COMPLETED');
+    assert.strictEqual(Number(completeBody.trip.actual_distance_km), 120);
+
+    // Verify vehicle and driver are back to AVAILABLE and vehicle odometer is incremented
+    const [vRowAfter] = await pool.query('SELECT status, odometer_km FROM vehicles WHERE id = ?', [availableVehicle.id]);
+    assert.strictEqual((vRowAfter as any[])[0].status, 'AVAILABLE');
+    assert.strictEqual(
+      Number((vRowAfter as any[])[0].odometer_km),
+      initialOdometer + 120
+    );
+
+    const [dRowAfter] = await pool.query('SELECT status FROM drivers WHERE id = ?', [availableDriver.id]);
+    assert.strictEqual((dRowAfter as any[])[0].status, 'AVAILABLE');
+
+    // Verify audit logs
+    const [auditRows] = await pool.query(
+      `SELECT * FROM audit_logs WHERE entity_type = 'trip' AND entity_id = ? AND action = 'TRIP_COMPLETED'`,
+      [tripId]
+    );
+    assert.ok((auditRows as any[]).length > 0, 'Should have written audit log for completion');
+  });
+
+  await t.test('Trips: Cancel trip workflow', async () => {
+    // 1. Create another DRAFT trip
+    const createRes = await fetch(`${baseUrl}/api/v1/trips`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        source: 'Warehouse A',
+        destination: 'Store C',
+        cargo_weight_kg: 400,
+        planned_distance_km: 80,
+        revenue: 1000,
+      }),
+    });
+    const { trip } = await createRes.json();
+    const tripId = trip.id;
+
+    // Retrieve available vehicle and driver
+    const optRes = await fetch(`${baseUrl}/api/v1/trips/dispatch-options`, {
+      headers: { cookie: dispatcherCookie },
+    });
+    const options = await optRes.json();
+    const availableVehicle = options.vehicles[0];
+    const availableDriver = options.drivers.find(
+      (d: any) => new Date(d.licence_expiry_date) >= new Date()
+    );
+
+    // 2. Dispatch
+    const dispatchCancelRes = await fetch(`${baseUrl}/api/v1/trips/${tripId}/dispatch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: dispatcherCookie,
+      },
+      body: JSON.stringify({
+        vehicle_id: availableVehicle.id,
+        driver_id: availableDriver.id,
+      }),
+    });
+    assert.strictEqual(dispatchCancelRes.status, 200);
+
+    // 3. Cancel the trip
+    const cancelRes = await fetch(`${baseUrl}/api/v1/trips/${tripId}/cancel`, {
+      method: 'POST',
+      headers: { cookie: dispatcherCookie },
+    });
+    assert.strictEqual(cancelRes.status, 200);
+    const cancelBody = await cancelRes.json();
+    assert.strictEqual(cancelBody.trip.status, 'CANCELLED');
+
+    // Verify resources released
+    const [vRow] = await pool.query('SELECT status FROM vehicles WHERE id = ?', [availableVehicle.id]);
+    assert.strictEqual((vRow as any[])[0].status, 'AVAILABLE');
+
+    const [dRow] = await pool.query('SELECT status FROM drivers WHERE id = ?', [availableDriver.id]);
+    assert.strictEqual((dRow as any[])[0].status, 'AVAILABLE');
+
+    // Verify audit logs
+    const [auditRows] = await pool.query(
+      `SELECT * FROM audit_logs WHERE entity_type = 'trip' AND entity_id = ? AND action = 'TRIP_CANCELLED'`,
+      [tripId]
+    );
+    assert.ok((auditRows as any[]).length > 0, 'Should have written audit log for cancellation');
+  });
+
+  await t.test('Maintenance: Open and Close Maintenance workflow', async () => {
+    // 1. Get an available vehicle
+    const listRes = await fetch(`${baseUrl}/api/v1/vehicles`, {
+      headers: { cookie: managerCookie },
+    });
+    const listBody = await listRes.json();
+    const availableVehicle = listBody.vehicles.find((v: any) => v.status === 'AVAILABLE');
+    assert.ok(availableVehicle, 'Should find an available vehicle');
+
+    // 2. Open maintenance log
+    const openRes = await fetch(`${baseUrl}/api/v1/maintenance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: managerCookie,
+      },
+      body: JSON.stringify({
+        vehicle_id: availableVehicle.id,
+        service_type: 'Brake Repair',
+        description: 'Replacing front disc brakes.',
+      }),
+    });
+    assert.strictEqual(openRes.status, 201);
+    const openBody = await openRes.json();
+    assert.strictEqual(openBody.log.status, 'ACTIVE');
+    assert.strictEqual(openBody.log.service_type, 'Brake Repair');
+    const logId = openBody.log.id;
+
+    // Verify vehicle is now IN_SHOP
+    const [vRowShop] = await pool.query('SELECT status FROM vehicles WHERE id = ?', [availableVehicle.id]);
+    assert.strictEqual((vRowShop as any[])[0].status, 'IN_SHOP');
+
+    // Try to open another maintenance log on the same vehicle -> expect 422 state conflict
+    const openAgainRes = await fetch(`${baseUrl}/api/v1/maintenance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: managerCookie,
+      },
+      body: JSON.stringify({
+        vehicle_id: availableVehicle.id,
+        service_type: 'Oil Change',
+        description: 'Routine oil change.',
+      }),
+    });
+    assert.strictEqual(openAgainRes.status, 422);
+
+    // 3. Close the maintenance log
+    const closeRes = await fetch(`${baseUrl}/api/v1/maintenance/${logId}/close`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        cookie: managerCookie,
+      },
+      body: JSON.stringify({
+        cost: 250.75,
+      }),
+    });
+    assert.strictEqual(closeRes.status, 200);
+    const closeBody = await closeRes.json();
+    assert.strictEqual(closeBody.log.status, 'CLOSED');
+    assert.strictEqual(Number(closeBody.log.cost), 250.75);
+    assert.ok(closeBody.log.closed_at);
+
+    // Verify vehicle is back to AVAILABLE
+    const [vRowAvail] = await pool.query('SELECT status FROM vehicles WHERE id = ?', [availableVehicle.id]);
+    assert.strictEqual((vRowAvail as any[])[0].status, 'AVAILABLE');
+
+    // Verify audit logs
+    const [auditLogOpened] = await pool.query(
+      `SELECT * FROM audit_logs WHERE entity_type = 'maintenance_log' AND entity_id = ? AND action = 'MAINTENANCE_OPENED'`,
+      [logId]
+    );
+    assert.ok((auditLogOpened as any[]).length > 0, 'Should log MAINTENANCE_OPENED');
+
+    const [auditLogClosed] = await pool.query(
+      `SELECT * FROM audit_logs WHERE entity_type = 'maintenance_log' AND entity_id = ? AND action = 'MAINTENANCE_CLOSED'`,
+      [logId]
+    );
+    assert.ok((auditLogClosed as any[]).length > 0, 'Should log MAINTENANCE_CLOSED');
+  });
+
+  await t.test('Audit Logs: Verify vehicle and driver operations log audit events', async () => {
+    const [rows] = await pool.query(
+      `SELECT * FROM audit_logs WHERE entity_type IN ('vehicle', 'driver') ORDER BY id DESC`
+    );
+    const logs = rows as any[];
+    assert.ok(logs.length >= 2, 'Should have written audit logs for vehicle/driver mutations');
+
+    const vehicleCreatedLog = logs.find(l => l.entity_type === 'vehicle' && l.action === 'VEHICLE_CREATED');
+    assert.ok(vehicleCreatedLog, 'Should log VEHICLE_CREATED');
+    assert.ok(vehicleCreatedLog.after_json, 'Should have after_json');
+
+    const vehicleUpdatedLog = logs.find(l => l.entity_type === 'vehicle' && l.action === 'VEHICLE_STATUS_CHANGED' || (l.entity_type === 'vehicle' && l.action === 'VEHICLE_UPDATED'));
+    assert.ok(vehicleUpdatedLog, 'Should log VEHICLE_UPDATED or VEHICLE_STATUS_CHANGED');
+
+    const driverCreatedLog = logs.find(l => l.entity_type === 'driver' && l.action === 'DRIVER_CREATED');
+    assert.ok(driverCreatedLog, 'Should log DRIVER_CREATED');
+    assert.ok(driverCreatedLog.after_json, 'Should have after_json');
+  });
+
   await stopServer();
 });

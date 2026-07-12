@@ -41,10 +41,10 @@ Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard
 
 ## Phase 3 - 03:50-05:35
 
-- [ ] Add audit-log helper usable by all state-changing services.
-- [ ] Validate dashboard query count and index use.
-- [ ] Integrate agreed route registrations from Teammates 3 and 4.
-- [ ] Support dashboard refresh data after trip, maintenance, and finance mutations.
+- [x] Add audit-log helper usable by all state-changing services.
+- [x] Validate dashboard query count and index use.
+- [x] Integrate agreed route registrations from Teammates 3 and 4.
+- [x] Support dashboard refresh data after trip, maintenance, and finance mutations.
 
 ## Phase 4 - 05:35-06:45
 

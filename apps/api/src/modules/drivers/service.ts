@@ -1,6 +1,8 @@
 import { DriverRepository } from './repository.js';
 import { Driver, CreateDriverInput, UpdateDriverInput, DriverFilters } from './types.js';
 import { ConflictError, ValidationError, BusinessRuleViolationError, ResourceNotFoundError } from '../../shared/errors/index.js';
+import { withTransaction } from '../../db/transaction.js';
+import { logAuditEvent } from '../../db/audit.js';
 
 export class DriverService {
   private driverRepository = new DriverRepository();
@@ -8,7 +10,7 @@ export class DriverService {
   /**
    * Register a new driver.
    */
-  async createDriver(input: CreateDriverInput): Promise<Driver> {
+  async createDriver(input: CreateDriverInput, actorUserId: number | null): Promise<Driver> {
     // 1. Normalize licence number
     if (!input.licence_number) {
       throw new ValidationError('Licence number is required.', 'licence_number');
@@ -50,10 +52,16 @@ export class DriverService {
       throw new ValidationError('Initial status must be AVAILABLE, OFF_DUTY, or SUSPENDED.', 'status');
     }
 
-    return this.driverRepository.create({
-      ...input,
-      licence_number: normalizedLicence,
-      licence_category: input.licence_category.trim().toUpperCase(),
+    return withTransaction(async (conn) => {
+      const driver = await this.driverRepository.create({
+        ...input,
+        licence_number: normalizedLicence,
+        licence_category: input.licence_category.trim().toUpperCase(),
+      }, conn);
+
+      await logAuditEvent(conn, actorUserId, 'driver', driver.id, 'DRIVER_CREATED', null, driver);
+
+      return driver;
     });
   }
 
@@ -71,75 +79,84 @@ export class DriverService {
   /**
    * Update driver details and check lifecycle transitions.
    */
-  async updateDriver(id: number, input: UpdateDriverInput): Promise<Driver> {
-    const current = await this.getDriverById(id);
-
-    // 1. Normalize licence number if provided
-    let normalizedLicence: string | undefined;
-    if (input.licence_number !== undefined) {
-      if (!input.licence_number) {
-        throw new ValidationError('Licence number cannot be empty.', 'licence_number');
+  async updateDriver(id: number, input: UpdateDriverInput, actorUserId: number | null): Promise<Driver> {
+    return withTransaction(async (conn) => {
+      const current = await this.driverRepository.findById(id, conn);
+      if (!current) {
+        throw new ResourceNotFoundError(`Driver with ID ${id} not found.`);
       }
-      normalizedLicence = input.licence_number.trim().toUpperCase();
 
-      if (normalizedLicence !== current.licence_number) {
-        const existing = await this.driverRepository.findByLicenceNumber(normalizedLicence);
-        if (existing) {
-          throw new ConflictError(
-            `Driver with licence number '${normalizedLicence}' already exists.`,
-            'licence_number'
+      // 1. Normalize licence number if provided
+      let normalizedLicence: string | undefined;
+      if (input.licence_number !== undefined) {
+        if (!input.licence_number) {
+          throw new ValidationError('Licence number cannot be empty.', 'licence_number');
+        }
+        normalizedLicence = input.licence_number.trim().toUpperCase();
+
+        if (normalizedLicence !== current.licence_number) {
+          const existing = await this.driverRepository.findByLicenceNumber(normalizedLicence, conn);
+          if (existing) {
+            throw new ConflictError(
+              `Driver with licence number '${normalizedLicence}' already exists.`,
+              'licence_number'
+            );
+          }
+        }
+      }
+
+      // 2. Validate category and constraints if provided
+      if (input.licence_category !== undefined) {
+        if (!['LIGHT', 'HEAVY'].includes(input.licence_category.trim().toUpperCase())) {
+          throw new ValidationError('Licence category must be LIGHT or HEAVY.', 'licence_category');
+        }
+      }
+      if (input.licence_expiry_date !== undefined) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(input.licence_expiry_date)) {
+          throw new ValidationError('Licence expiry date must be in YYYY-MM-DD format.', 'licence_expiry_date');
+        }
+      }
+      if (input.safety_score !== undefined && (input.safety_score < 0 || input.safety_score > 100)) {
+        throw new ValidationError('Safety score must be between 0.00 and 100.00.', 'safety_score');
+      }
+
+      // 3. Enforce lifecycle transitions for driver status
+      if (input.status !== undefined && input.status !== current.status) {
+        const currentStatus = current.status;
+        const targetStatus = input.status;
+
+        if (!['AVAILABLE', 'ON_TRIP', 'OFF_DUTY', 'SUSPENDED'].includes(targetStatus)) {
+          throw new ValidationError(`Invalid driver status: ${targetStatus}`, 'status');
+        }
+
+        // Check current state restrictions
+        if (currentStatus === 'ON_TRIP') {
+          throw new BusinessRuleViolationError(
+            'INVALID_STATE_CHANGE',
+            'Cannot manually change status of a driver currently on a trip.',
+            'status'
+          );
+        }
+
+        // Check target state restrictions
+        if (targetStatus === 'ON_TRIP') {
+          throw new BusinessRuleViolationError(
+            'INVALID_STATE_CHANGE',
+            'Driver status cannot be manually set to ON_TRIP.',
+            'status'
           );
         }
       }
-    }
 
-    // 2. Validate category and constraints if provided
-    if (input.licence_category !== undefined) {
-      if (!['LIGHT', 'HEAVY'].includes(input.licence_category.trim().toUpperCase())) {
-        throw new ValidationError('Licence category must be LIGHT or HEAVY.', 'licence_category');
-      }
-    }
-    if (input.licence_expiry_date !== undefined) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(input.licence_expiry_date)) {
-        throw new ValidationError('Licence expiry date must be in YYYY-MM-DD format.', 'licence_expiry_date');
-      }
-    }
-    if (input.safety_score !== undefined && (input.safety_score < 0 || input.safety_score > 100)) {
-      throw new ValidationError('Safety score must be between 0.00 and 100.00.', 'safety_score');
-    }
+      const updated = await this.driverRepository.update(id, {
+        ...input,
+        ...(normalizedLicence ? { licence_number: normalizedLicence } : {}),
+        ...(input.licence_category ? { licence_category: input.licence_category.trim().toUpperCase() } : {}),
+      }, conn);
 
-    // 3. Enforce lifecycle transitions for driver status
-    if (input.status !== undefined && input.status !== current.status) {
-      const currentStatus = current.status;
-      const targetStatus = input.status;
+      await logAuditEvent(conn, actorUserId, 'driver', id, 'DRIVER_UPDATED', current, updated);
 
-      if (!['AVAILABLE', 'ON_TRIP', 'OFF_DUTY', 'SUSPENDED'].includes(targetStatus)) {
-        throw new ValidationError(`Invalid driver status: ${targetStatus}`, 'status');
-      }
-
-      // Check current state restrictions
-      if (currentStatus === 'ON_TRIP') {
-        throw new BusinessRuleViolationError(
-          'INVALID_STATE_CHANGE',
-          'Cannot manually change status of a driver currently on a trip.',
-          'status'
-        );
-      }
-
-      // Check target state restrictions
-      if (targetStatus === 'ON_TRIP') {
-        throw new BusinessRuleViolationError(
-          'INVALID_STATE_CHANGE',
-          'Driver status cannot be manually set to ON_TRIP.',
-          'status'
-        );
-      }
-    }
-
-    return this.driverRepository.update(id, {
-      ...input,
-      ...(normalizedLicence ? { licence_number: normalizedLicence } : {}),
-      ...(input.licence_category ? { licence_category: input.licence_category.trim().toUpperCase() } : {}),
+      return updated;
     });
   }
 

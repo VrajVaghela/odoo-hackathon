@@ -1,12 +1,14 @@
 import pool from '../../db/pool.js';
+import { PoolConnection } from 'mysql2/promise';
 import { Vehicle, CreateVehicleInput, UpdateVehicleInput, VehicleFilters } from './types.js';
 
 export class VehicleRepository {
   /**
    * Find vehicle by ID.
    */
-  async findById(id: number): Promise<Vehicle | null> {
-    const [rows] = await pool.query(
+  async findById(id: number, connection?: PoolConnection): Promise<Vehicle | null> {
+    const executor = connection || pool;
+    const [rows] = await executor.query(
       'SELECT id, registration_number, name, model, vehicle_type, max_capacity_kg, odometer_km, acquisition_cost, status, region, retired_at FROM vehicles WHERE id = ?',
       [id]
     );
@@ -17,8 +19,9 @@ export class VehicleRepository {
   /**
    * Find vehicle by registration number.
    */
-  async findByRegistrationNumber(regNum: string): Promise<Vehicle | null> {
-    const [rows] = await pool.query(
+  async findByRegistrationNumber(regNum: string, connection?: PoolConnection): Promise<Vehicle | null> {
+    const executor = connection || pool;
+    const [rows] = await executor.query(
       'SELECT id, registration_number, name, model, vehicle_type, max_capacity_kg, odometer_km, acquisition_cost, status, region, retired_at FROM vehicles WHERE registration_number = ?',
       [regNum]
     );
@@ -29,12 +32,13 @@ export class VehicleRepository {
   /**
    * Create a new vehicle.
    */
-  async create(input: CreateVehicleInput): Promise<Vehicle> {
+  async create(input: CreateVehicleInput, connection?: PoolConnection): Promise<Vehicle> {
     const status = input.status || 'AVAILABLE';
     const odometer = input.odometer_km ?? 0;
     const retiredAt = status === 'RETIRED' ? new Date() : null;
 
-    const [result] = await pool.query(
+    const executor = connection || pool;
+    const [result] = await executor.query(
       `INSERT INTO vehicles (registration_number, name, model, vehicle_type, max_capacity_kg, odometer_km, acquisition_cost, status, region, retired_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -52,13 +56,13 @@ export class VehicleRepository {
     );
 
     const insertId = (result as any).insertId;
-    return (await this.findById(insertId))!;
+    return (await this.findById(insertId, connection))!;
   }
 
   /**
    * Update an existing vehicle.
    */
-  async update(id: number, input: UpdateVehicleInput): Promise<Vehicle> {
+  async update(id: number, input: UpdateVehicleInput, connection?: PoolConnection): Promise<Vehicle> {
     const fields: string[] = [];
     const values: any[] = [];
 
@@ -108,16 +112,17 @@ export class VehicleRepository {
     }
 
     if (fields.length === 0) {
-      return (await this.findById(id))!;
+      return (await this.findById(id, connection))!;
     }
 
     values.push(id);
-    await pool.query(
+    const executor = connection || pool;
+    await executor.query(
       `UPDATE vehicles SET ${fields.join(', ')} WHERE id = ?`,
       values
     );
 
-    return (await this.findById(id))!;
+    return (await this.findById(id, connection))!;
   }
 
   /**

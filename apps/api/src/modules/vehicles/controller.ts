@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../middleware/auth.js';
 import { VehicleService } from './service.js';
 
 export class VehicleController {
@@ -58,9 +59,10 @@ export class VehicleController {
   /**
    * HTTP Handler for creating/registering a vehicle.
    */
-  createVehicle = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  createVehicle = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const vehicle = await this.vehicleService.createVehicle(req.body);
+      const actorUserId = req.user?.id || null;
+      const vehicle = await this.vehicleService.createVehicle(req.body, actorUserId);
       res.status(201).json({ vehicle });
     } catch (err) {
       next(err);
@@ -70,7 +72,7 @@ export class VehicleController {
   /**
    * HTTP Handler for updating a vehicle.
    */
-  updateVehicle = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  updateVehicle = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
@@ -83,7 +85,8 @@ export class VehicleController {
         return;
       }
 
-      const vehicle = await this.vehicleService.updateVehicle(id, req.body);
+      const actorUserId = req.user?.id || null;
+      const vehicle = await this.vehicleService.updateVehicle(id, req.body, actorUserId);
       res.status(200).json({ vehicle });
     } catch (err) {
       next(err);

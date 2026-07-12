@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { AuthenticatedRequest } from '../../middleware/auth.js';
 import { DriverService } from './service.js';
 
 export class DriverController {
@@ -57,9 +58,10 @@ export class DriverController {
   /**
    * HTTP Handler for creating/registering a driver.
    */
-  createDriver = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  createDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const driver = await this.driverService.createDriver(req.body);
+      const actorUserId = req.user?.id || null;
+      const driver = await this.driverService.createDriver(req.body, actorUserId);
       res.status(201).json({ driver });
     } catch (err) {
       next(err);
@@ -69,7 +71,7 @@ export class DriverController {
   /**
    * HTTP Handler for updating a driver details.
    */
-  updateDriver = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  updateDriver = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = parseInt(req.params.id, 10);
       if (isNaN(id)) {
@@ -82,7 +84,8 @@ export class DriverController {
         return;
       }
 
-      const driver = await this.driverService.updateDriver(id, req.body);
+      const actorUserId = req.user?.id || null;
+      const driver = await this.driverService.updateDriver(id, req.body, actorUserId);
       res.status(200).json({ driver });
     } catch (err) {
       next(err);

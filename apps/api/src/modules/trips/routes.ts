@@ -3,11 +3,11 @@ import { authenticate, requireRole } from '../../middleware/auth.js';
 import {
   createTrip,
   dispatchTrip,
+  completeTrip,
+  cancelTrip,
   listTrips,
   getTrip,
   getDispatchOptions,
-  completeTrip,
-  cancelTrip,
 } from './controller.js';
 
 const router = Router();
