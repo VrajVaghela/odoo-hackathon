@@ -51,86 +51,36 @@ export interface VehicleStatusCount {
   count: number;
 }
 
-/** Fetch vehicles list from API — used to compute dashboard KPIs */
-async function fetchVehiclesRaw(): Promise<any[]> {
-  try {
-    const data = await handleResponse<{ vehicles: any[] }>(await fetch('/api/v1/vehicles'));
-    return data.vehicles || [];
-  } catch {
-    return [];
-  }
-}
-
-/** Fetch drivers list from API */
-async function fetchDriversRaw(): Promise<any[]> {
-  try {
-    const data = await handleResponse<{ drivers: any[] }>(await fetch('/api/v1/drivers'));
-    return data.drivers || [];
-  } catch {
-    return [];
-  }
-}
-
-/** Fetch trips list from API */
-async function fetchTripsRaw(status?: string): Promise<any[]> {
-  try {
-    const url = status ? `/api/v1/trips?status=${encodeURIComponent(status)}` : '/api/v1/trips';
-    const data = await handleResponse<{ trips: any[] }>(await fetch(url));
-    return data.trips || [];
-  } catch {
-    return [];
-  }
+/** Fetch dashboard data from the dedicated endpoint */
+async function fetchDashboardRaw(): Promise<{ kpis: any; activeTrips: any[] }> {
+  return handleResponse<{ kpis: any; activeTrips: any[] }>(await fetch('/api/v1/dashboard'));
 }
 
 /**
- * Compute dashboard KPIs by aggregating vehicles, drivers, and trips data.
- * This approach works even when the backend has no dedicated dashboard endpoint.
+ * Fetch dashboard KPIs from backend.
  */
 export async function fetchDashboardKPIs(): Promise<DashboardKPIs> {
-  const [vehicles, drivers, trips] = await Promise.all([
-    fetchVehiclesRaw(),
-    fetchDriversRaw(),
-    fetchTripsRaw(),
-  ]);
-
-  const availableVehicles = vehicles.filter(v => v.status === 'AVAILABLE').length;
-  const onTripVehicles = vehicles.filter(v => v.status === 'ON_TRIP').length;
-  const inShopVehicles = vehicles.filter(v => v.status === 'IN_SHOP').length;
-  const retiredVehicles = vehicles.filter(v => v.status === 'RETIRED').length;
-  const totalVehicles = vehicles.length;
-
-  const availableDrivers = drivers.filter(d => d.status === 'AVAILABLE').length;
-  const totalDrivers = drivers.length;
-
-  const activeTrips = trips.filter(t => t.status === 'DISPATCHED').length;
-  const draftTrips = trips.filter(t => t.status === 'DRAFT').length;
-  const completedTrips = trips.filter(t => t.status === 'COMPLETED').length;
-
-  const nonRetired = totalVehicles - retiredVehicles;
-  const fleetUtilisation = nonRetired > 0
-    ? Math.round((onTripVehicles / nonRetired) * 100)
-    : 0;
-
+  const data = await fetchDashboardRaw();
+  const kpis = data.kpis;
   return {
-    totalVehicles,
-    availableVehicles,
-    onTripVehicles,
-    inShopVehicles,
-    retiredVehicles,
-    totalDrivers,
-    availableDrivers,
-    activeTrips,
-    draftTrips,
-    completedTrips,
-    fleetUtilisation,
+    totalVehicles: kpis.totalVehicles || 0,
+    availableVehicles: kpis.availableVehicles || 0,
+    onTripVehicles: kpis.onTripVehicles || 0,
+    inShopVehicles: kpis.inShopVehicles || 0,
+    retiredVehicles: kpis.retiredVehicles || 0,
+    totalDrivers: kpis.totalDrivers || 0,
+    availableDrivers: kpis.availableDriversCount || 0,
+    activeTrips: kpis.activeTrips || 0,
+    draftTrips: kpis.draftTrips || 0,
+    completedTrips: kpis.completedTrips || 0,
+    fleetUtilisation: kpis.fleetUtilisation || 0,
   };
 }
 
 /** Fetch recent trips for the dispatch board */
 export async function fetchRecentTrips(): Promise<RecentTrip[]> {
-  const trips = await fetchTripsRaw();
-  // Sort by most recent first, take 10
-  return trips
+  const data = await fetchDashboardRaw();
+  return (data.activeTrips || [])
     .sort((a: any, b: any) => {
       const dateA = a.dispatched_at || a.completed_at || '0';
       const dateB = b.dispatched_at || b.completed_at || '0';
@@ -142,19 +92,21 @@ export async function fetchRecentTrips(): Promise<RecentTrip[]> {
       trip_code: t.trip_code,
       source: t.source,
       destination: t.destination,
-      vehicle_reg: t.vehicle_reg || t.vehicle_name || '—',
+      vehicle_reg: t.vehicle_registration_number || t.vehicle_name || '—',
       driver_name: t.driver_name || '—',
       status: t.status,
-      cargo_weight_kg: t.cargo_weight_kg,
+      cargo_weight_kg: Number(t.cargo_weight_kg),
     }));
 }
 
 /** Get vehicle status breakdown counts */
 export async function fetchVehicleStatusCounts(): Promise<VehicleStatusCount[]> {
-  const vehicles = await fetchVehiclesRaw();
-  const counts: Record<string, number> = {};
-  vehicles.forEach((v: any) => {
-    counts[v.status] = (counts[v.status] || 0) + 1;
-  });
-  return Object.entries(counts).map(([status, count]) => ({ status, count }));
+  const data = await fetchDashboardRaw();
+  const kpis = data.kpis;
+  return [
+    { status: 'AVAILABLE', count: kpis.availableVehicles || 0 },
+    { status: 'ON_TRIP', count: kpis.onTripVehicles || 0 },
+    { status: 'IN_SHOP', count: kpis.inShopVehicles || 0 },
+    { status: 'RETIRED', count: kpis.retiredVehicles || 0 },
+  ];
 }

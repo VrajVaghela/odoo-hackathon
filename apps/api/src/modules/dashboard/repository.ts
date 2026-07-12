@@ -143,6 +143,82 @@ export class DashboardRepository {
   }
 
   /**
+   * Get retired vehicles count matching filters.
+   */
+  async getRetiredVehiclesCount(filters: { vehicleType?: string; region?: string }): Promise<number> {
+    const whereClauses = ['retired_at IS NOT NULL'];
+    const values: any[] = [];
+
+    if (filters.vehicleType) {
+      whereClauses.push('vehicle_type = ?');
+      values.push(filters.vehicleType);
+    }
+    if (filters.region) {
+      whereClauses.push('region = ?');
+      values.push(filters.region);
+    }
+
+    const whereSql = `WHERE ${whereClauses.join(' AND ')}`;
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) as count FROM vehicles ${whereSql}`,
+      values
+    );
+
+    return Number((rows as any[])[0].count);
+  }
+
+  /**
+   * Get total drivers count.
+   */
+  async getTotalDriversCount(): Promise<number> {
+    const [rows] = await pool.query(`SELECT COUNT(*) as count FROM drivers`);
+    return Number((rows as any[])[0].count);
+  }
+
+  /**
+   * Get counts of active, draft, completed trips.
+   */
+  async getTripStatusCounts(filters: { vehicleType?: string; region?: string }): Promise<{
+    active: number;
+    draft: number;
+    completed: number;
+  }> {
+    const whereClauses: string[] = [];
+    const values: any[] = [];
+
+    let querySql = `SELECT t.status, COUNT(*) as count FROM trips t`;
+    if (filters.vehicleType || filters.region) {
+      querySql += ` JOIN vehicles v ON t.vehicle_id = v.id`;
+      if (filters.vehicleType) {
+        whereClauses.push('v.vehicle_type = ?');
+        values.push(filters.vehicleType);
+      }
+      if (filters.region) {
+        whereClauses.push('v.region = ?');
+        values.push(filters.region);
+      }
+    }
+
+    const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    querySql += ` ${whereSql} GROUP BY t.status`;
+
+    const [rows] = await pool.query(querySql, values);
+
+    let active = 0;
+    let draft = 0;
+    let completed = 0;
+
+    for (const row of rows as any[]) {
+      const count = Number(row.count);
+      if (row.status === 'DISPATCHED') active = count;
+      if (row.status === 'DRAFT') draft = count;
+      if (row.status === 'COMPLETED') completed = count;
+    }
+
+    return { active, draft, completed };
+  }
+
+  /**
    * Get active/recent trips for the dispatch board.
    */
   async getActiveTrips(filters: {

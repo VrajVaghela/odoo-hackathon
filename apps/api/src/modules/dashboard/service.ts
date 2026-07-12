@@ -10,7 +10,7 @@ export class DashboardService {
     vehicleType?: string;
     region?: string;
     status?: string;
-  }): Promise<{ kpis: DashboardKPIs; activeTrips: DashboardTrip[] }> {
+  }): Promise<{ kpis: any; activeTrips: DashboardTrip[] }> {
     // 1. Get vehicle breakdown
     const vehicleBreakdown = await this.dashboardRepository.getVehicleBreakdown({
       vehicleType: filters.vehicleType,
@@ -36,10 +36,24 @@ export class DashboardService {
       value: `${utilizationPercent}%`,
     };
 
-    // 5. Get active/recent trips list for the dispatch board
+    // 5. Get retired vehicles count, total drivers, and trip metrics
+    const retiredCount = await this.dashboardRepository.getRetiredVehiclesCount({
+      vehicleType: filters.vehicleType,
+      region: filters.region,
+    });
+    const totalDrivers = await this.dashboardRepository.getTotalDriversCount();
+    const tripMetrics = await this.dashboardRepository.getTripStatusCounts({
+      vehicleType: filters.vehicleType,
+      region: filters.region,
+    });
+
+    const totalVehiclesCount = vehicleBreakdown.total + retiredCount;
+
+    // 6. Get active/recent trips list for the dispatch board
     const activeTrips = await this.dashboardRepository.getActiveTrips(filters);
 
-    const kpis: DashboardKPIs = {
+    const kpis = {
+      // Original nested fields for backward compatibility/tests
       activeVehicles: {
         total: vehicleBreakdown.total,
         onTrip: vehicleBreakdown.onTrip,
@@ -55,6 +69,19 @@ export class DashboardService {
         draftTripCodes: pendingDispatches.draftTripCodes,
       },
       fleetUtilization,
+
+      // New flat fields for the frontend
+      totalVehicles: totalVehiclesCount,
+      availableVehicles: vehicleBreakdown.available,
+      onTripVehicles: vehicleBreakdown.onTrip,
+      inShopVehicles: vehicleBreakdown.inShop,
+      retiredVehicles: retiredCount,
+      totalDrivers,
+      availableDriversCount: availableDrivers.total,
+      activeTrips: tripMetrics.active,
+      draftTrips: tripMetrics.draft,
+      completedTrips: tripMetrics.completed,
+      fleetUtilisation: utilizationPercent,
     };
 
     return { kpis, activeTrips };
