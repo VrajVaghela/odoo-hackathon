@@ -31,17 +31,46 @@ const App: React.FC = () => {
   const [user, setUser] = useState<UserSession | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
 
-  // Load session from localStorage on start
+  // Load session from backend /api/v1/auth/me on mount to sync with cookie (important for OAuth redirect)
   useEffect(() => {
     const savedSession = localStorage.getItem('transitops_session');
     if (savedSession) {
       try {
-        const parsed = JSON.parse(savedSession);
-        setUser(parsed);
+        setUser(JSON.parse(savedSession));
       } catch (e) {
         localStorage.removeItem('transitops_session');
       }
     }
+
+    fetch('/api/v1/auth/me')
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('Not authenticated');
+      })
+      .then((data) => {
+        if (data && data.user) {
+          setUser(data.user);
+          localStorage.setItem('transitops_session', JSON.stringify(data.user));
+          if (!savedSession) {
+            const role = data.user.role;
+            const allowed = ROLE_PAGES[role] || [];
+            if (allowed.length > 0) {
+              setCurrentPage(allowed[0]);
+            } else {
+              setCurrentPage('dashboard');
+            }
+          }
+        } else {
+          setUser(null);
+          localStorage.removeItem('transitops_session');
+        }
+      })
+      .catch(() => {
+        setUser(null);
+        localStorage.removeItem('transitops_session');
+      });
   }, []);
 
   // Update initial page when user logs in based on role permission

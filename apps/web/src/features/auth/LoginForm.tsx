@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormField } from '../../components/FormField.tsx';
 import { ErrorAlert } from '../../components/ErrorAlert.tsx';
 
@@ -13,6 +13,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   const [pending, setPending] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [apiError, setApiError] = useState<{ message: string; code?: string } | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      setApiError({
+        message: errorParam,
+        code: 'OAUTH_FAILED',
+      });
+      // Clear URL parameter so it doesn't persist on page refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
 
   const demoAccounts = [
     { label: 'Fleet Manager', email: 'manager@transitops.com', role: 'FLEET_MANAGER' },
@@ -238,6 +252,44 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
         <button type="submit" style={buttonStyle} disabled={pending}>
           {pending ? 'SIGNING IN...' : 'SIGN IN'}
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: 'var(--space-4) 0 var(--space-2)' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
+          <span style={{ padding: '0 var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', fontWeight: 600 }}>OR</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--color-border)' }} />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => { window.location.href = '/api/v1/auth/google'; }}
+          style={{
+            width: '100%',
+            height: 'var(--control-height)',
+            backgroundColor: '#ffffff',
+            color: '#1f1f1f',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: 'var(--text-sm)',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'var(--space-2)',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f2f2f2'; }}
+          onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+          disabled={pending}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.7-1.57 2.69-3.87 2.69-6.57z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.47-.8 5.96-2.23l-2.91-2.24c-.8.54-1.84.87-3.05.87-2.34 0-4.33-1.58-5.03-3.7H1.02v2.3C2.5 15.97 5.51 18 9 18z" fill="#34A853"/>
+            <path d="M3.97 10.7c-.18-.54-.28-1.12-.28-1.7s.1-1.16.28-1.7V5H1.02A8.99 8.99 0 0 0 0 9c0 1.45.35 2.82.97 4.04l3-2.34z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.3C13.47.89 11.43 0 9 0 5.51 0 2.5 2.03 1.02 5l2.95 2.3C4.67 5.18 6.66 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
         </button>
       </form>
 

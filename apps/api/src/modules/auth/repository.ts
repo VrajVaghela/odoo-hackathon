@@ -73,4 +73,29 @@ export class AuthRepository {
       [userId]
     );
   }
+
+  /**
+   * Inserts a new user record.
+   */
+  async createUser(email: string, roleId: number, passwordHash: string): Promise<UserRow> {
+    const normalised = email.trim().toLowerCase();
+    const [result] = await pool.query(
+      'INSERT INTO users (role_id, email, password_hash, is_active) VALUES (?, ?, ?, 1)',
+      [roleId, normalised, passwordHash]
+    );
+    const insertId = (result as any).insertId;
+    const [rows] = await pool.query(
+      `SELECT u.id, u.email, u.password_hash, u.is_active, u.failed_login_count, u.lock_until, r.code as role_code
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.id = ?`,
+      [insertId]
+    );
+    const user = (rows as any[])[0];
+    if (!user) {
+      throw new Error('Failed to retrieve newly created user.');
+    }
+    return user as UserRow;
+  }
 }
+

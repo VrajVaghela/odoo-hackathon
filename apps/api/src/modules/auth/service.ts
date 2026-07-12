@@ -1,5 +1,5 @@
 import { AuthRepository } from './repository.js';
-import { verifyPassword, generateSessionToken, hashSessionToken } from '../../shared/utils/crypto.js';
+import { verifyPassword, hashPassword, generateSessionToken, hashSessionToken } from '../../shared/utils/crypto.js';
 import { AuthenticationError, BusinessRuleViolationError } from '../../shared/errors/index.js';
 
 export class AuthService {
@@ -82,4 +82,90 @@ export class AuthService {
     const tokenHash = hashSessionToken(token);
     await this.authRepository.deleteSession(tokenHash);
   }
+
+  /**
+   * Exchanges authorization code for tokens, retrieves profile, maps user, and returns session token.
+   */
+  async verifyGoogleCodeAndLogin(code: string): Promise<{ token: string; user: { email: string; role: string } }> {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+
+    if (!clientId || !clientSecret || !redirectUri) {
+      throw new Error('Google OAuth is not configured on the server (missing client ID, secret, or redirect URI).');
+    }
+
+    // 1. Exchange auth code for tokens
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }).toString(),
+    });
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      throw new Error(`Google token exchange failed: ${errorText}`);
+    }
+
+    const tokenData = (await tokenResponse.json()) as any;
+    const accessToken = tokenData.access_token;
+
+    if (!accessToken) {
+      throw new Error('Google did not return an access token.');
+    }
+
+    // 2. Fetch user profile information
+    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!userInfoResponse.ok) {
+      const errorText = await userInfoResponse.text();
+      throw new Error(`Failed to fetch Google userinfo: ${errorText}`);
+    }
+
+    const userInfo = (await userInfoResponse.json()) as any;
+    const email = userInfo.email;
+
+    if (!email) {
+      throw new Error('Failed to retrieve user email from Google.');
+    }
+
+    // 3. Find user in the database
+    const user = await this.authRepository.findUserByEmail(email);
+
+    if (!user) {
+      throw new AuthenticationError('This Google account is not registered in the system.');
+    }
+
+    if (!user.is_active) {
+      throw new AuthenticationError('This user account is inactive.');
+    }
+
+    // 4. Create session token
+    const token = generateSessionToken();
+    const tokenHash = hashSessionToken(token);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours expiry
+
+    await this.authRepository.createSession(user.id, tokenHash, expiresAt);
+
+    return {
+      token,
+      user: {
+        email: user.email,
+        role: user.role_code,
+      },
+    };
+  }
 }
+
