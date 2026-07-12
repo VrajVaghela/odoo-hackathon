@@ -6,6 +6,8 @@ import { VehiclesPage } from './features/vehicles/VehiclesPage.tsx';
 import { DriversPage } from './features/drivers/DriversPage.tsx';
 import { TripsPage } from './features/trips/TripsPage.tsx';
 import { MaintenancePage } from './features/maintenance/MaintenancePage.tsx';
+import { FinancePage } from './features/finance/FinancePage.tsx';
+import { ReportsPage } from './features/reports/ReportsPage.tsx';
 import { PageHeader } from './components/PageHeader.tsx';
 import { EmptyState } from './components/EmptyState.tsx';
 
@@ -169,7 +171,8 @@ const App: React.FC = () => {
         return <MaintenancePage />;
 
       case 'finance':
-        return (
+        return <FinancePage />; /* Previous Phase 3 placeholder retained below for minimal shared-file integration. */
+        /* return (
           <div style={containerStyle}>
             <PageHeader
               title="Fuel & Expense Ledger"
@@ -181,10 +184,11 @@ const App: React.FC = () => {
               description="Fuel logs, expense entries, and cost tracking will be available once Phase 3 is completed."
             />
           </div>
-        );
+        ); */
 
       case 'reports':
-        return (
+        return <ReportsPage />; /* Previous Phase 3 placeholder retained below for minimal shared-file integration. */
+        /* return (
           <div style={containerStyle}>
             <PageHeader
               title="Analytics Reports"
@@ -196,7 +200,7 @@ const App: React.FC = () => {
               description="Fleet ROI analysis, fuel efficiency reports, and CSV export will be enabled in Phase 3."
             />
           </div>
-        );
+        ); */
 
       default:
         return (

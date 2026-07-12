@@ -43,16 +43,20 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 - [x] Trip cancellation restores availability safely.
 - [x] Open maintenance sets vehicle to In Shop.
 - [x] Close maintenance restores vehicle to Available unless retired.
-- [ ] Fuel logging persists liters, cost, date, vehicle, and optional trip.
-- [ ] Expense logging persists category, amount, date, vehicle/trip.
+- [x] Fuel logging persists liters, cost, date, vehicle, and optional trip.
+- [x] Expense logging persists category, amount, date, vehicle/trip.
 - [x] Dashboard refreshes after domain mutations.
-- [ ] Fuel efficiency report derives from persisted data.
-- [ ] Operational cost report derives from fuel, maintenance, and expense data.
-- [ ] ROI report derives from revenue, fuel, maintenance, and acquisition cost.
-- [ ] CSV export is correct and downloaded locally.
+- [x] Fuel efficiency report derives from persisted data.
+- [x] Operational cost report derives from fuel, maintenance, and expense data.
+- [x] ROI report derives from revenue, fuel, maintenance, and acquisition cost.
+- [x] CSV export is correct and downloaded locally.
 - [x] State-changing actions create audit records.
 
+<<<<<<< HEAD
 Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Frontend Phase 2 screens (dashboard, vehicles, drivers, trips) are built against the live API with role-aware navigation and a no-permission screen. Teammate 2 Phase 3 frontend integration is now verified: the dashboard client uses `/api/v1/dashboard` for Dispatcher-safe data, the trip workflow remains integrated, and the Maintenance screen consumes the live API with shared form, status, error, empty, loading, and confirmation primitives. Remaining Phase 3 work is finance-owned: fuel/expense persistence, the fuel-efficiency/operational-cost/ROI reports, CSV export, and the Fuel & Expenses / Analytics screens. Verified with `npm.cmd run build --workspace=apps/web`.
+=======
+Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Teammate 4 finance/reporting is complete: fuel and expense persistence, fuel-efficiency/operational-cost/ROI reporting, CSV export, and Financial Analyst fuel/expense and analytics screens are live at `/api/v1/finance` and `/api/v1/reports`. Defect D4-P2-001 (the Dispatcher dashboard aggregates role-restricted registry endpoints instead of `/api/v1/dashboard`) remains open.
+>>>>>>> 0c9c33e1892dd9b85fb7a9018d10a05d9f46831b
 
 ## Phase 4 - Quality gates
 
@@ -64,8 +68,10 @@ Verification note (2026-07-12): Maintenance open/close transactions are implemen
 - [ ] Registry screens handle loading, empty, error, and no-results states.
 - [ ] Desktop, tablet, and mobile layouts are reviewed.
 - [ ] Keyboard, focus, label, and contrast checks pass.
-- [ ] Mandatory business-rule tests pass.
+- [x] Mandatory business-rule tests pass.
 - [ ] Fresh migration + seed + complete demo flow pass.
+
+Verification note (2026-07-12): Teammate 3 Phase 4 mandatory business-rule matrix was run against a reset MySQL seed before and after integration verification. `npm run test --workspace=apps/api` passed 20/20 both times, covering dispatch rejection/success rules, lifecycle completion/cancellation, maintenance open/close, RBAC-adjacent integration checks, and audit assertions.
 
 ## Phase 5 - Submission and demo
 
