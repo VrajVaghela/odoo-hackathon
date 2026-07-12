@@ -56,11 +56,19 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Phase 4 - 05:35-06:45
 
-- [ ] Verify every metric with independently calculated expected result.
-- [ ] Test CSV escaping and totals.
-- [ ] Run complete test suite after integration.
-- [ ] Run fresh migration/seed/reset and record exact start commands.
-- [ ] Prepare two concise debugging examples: failed dispatch and maintenance conflict resolved through logs/tests.
+- [x] Verify every metric with independently calculated expected result.
+- [x] Test CSV escaping and totals.
+- [x] Run complete test suite after integration.
+- [x] Run fresh migration/seed/reset and record exact start commands.
+- [x] Prepare two concise debugging examples: failed dispatch and maintenance conflict resolved through logs/tests.
+
+## Current Phase 4 evidence - 2026-07-12
+
+- Fresh seed validation is encoded in `apps/api/test/finance-reports.test.ts`: fleet utilisation is 25%, completed revenue INR 1,200, fuel INR 4,500, maintenance INR 0, expenses INR 350, operational cost INR 4,850, fleet ROI -3.06%; `KA-01-AA-1111` has 500 completed km, 50 L, 10 km/L, INR 4,850 cost, and -22% ROI.
+- The same regression test changes a vehicle name only within its test transaction window and proves CSV escaping for commas, quotes, and a newline; it also asserts the `FLEET TOTAL` CSV row matches the summary totals. The original name is restored in `finally`.
+- Verified from a fresh reset: `npm.cmd run db:reset`, then `npm.cmd run test` passed 23/23 API tests. `npm.cmd run build:api` and `npm.cmd run build:web` both pass; use `npm.cmd run dev` to start the API and web clients for the local demo.
+- Debug example — failed dispatch: reset, sign in as Dispatcher, and attempt `POST /api/v1/trips/{TRP-105 id}/dispatch` with `KA-01-AA-1111` and an available driver. Cargo is 801 kg against the van's 800 kg capacity; the dispatch rule test asserts the capacity error and verifies the trip/resource state was rolled back. Evidence: `apps/api/test/trips-dispatch.test.ts` (“rejects cargo above capacity and rolls back the attempted dispatch”).
+- Debug example — maintenance conflict: reset, sign in as Fleet Manager, open maintenance for an available vehicle, then repeat the same open request. The first request changes the vehicle to `IN_SHOP` and records audit rows; the second returns `VEHICLE_ALREADY_IN_MAINTENANCE` without another active record. Evidence: `apps/api/test/phase2.test.ts` (“Maintenance: Open and Close Maintenance workflow”) and the row-lock/audit transaction in `apps/api/src/modules/maintenance/service.ts`.
 
 ## Phase 5 - 06:45-08:00
 

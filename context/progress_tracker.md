@@ -52,6 +52,7 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 - [x] CSV export is correct and downloaded locally.
 - [x] State-changing actions create audit records.
 
+<<<<<<< HEAD
 Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Teammate 4 finance/reporting is complete: fuel and expense persistence, fuel-efficiency/operational-cost/ROI reporting, CSV export, and Financial Analyst fuel/expense and analytics screens are live at `/api/v1/finance` and `/api/v1/reports`. Teammate 2 Phase 3 frontend integration is verified: the dashboard client uses `/api/v1/dashboard` for Dispatcher-safe data, the trip workflow remains integrated, and the Maintenance screen consumes the live API with shared form, status, error, empty, loading, and confirmation primitives. Defect D4-P2-001 is fixed. Verified with `npm.cmd run build --workspace=apps/web`.
 
 ## Phase 4 - Quality gates
@@ -64,10 +65,27 @@ Verification note (2026-07-12): Maintenance open/close transactions are implemen
 - [x] Registry screens handle loading, empty, error, and no-results states.
 - [x] Desktop, tablet, and mobile layouts are reviewed.
 - [x] Keyboard, focus, label, and contrast checks pass.
+=======
+Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Teammate 2 Phase 3 frontend integration is verified (MaintenancePage consumes live API with shared primitives). Teammate 4 finance/reporting is complete (fuel/expense persistence, reporting, CSV export, and pages are live at `/api/v1/finance` and `/api/v1/reports`). Defect D4-P2-001 (the dashboard client aggregates role-restricted registry endpoints instead of `/api/v1/dashboard`) is Resolved.
+
+
+## Phase 4 - Quality gates
+
+- [x] Required role is checked at every sensitive API route.
+- [x] Password/session/token data is not logged or exposed.
+- [x] All SQL uses parameters.
+- [x] Dispatch and maintenance transactions use row locking/re-checks.
+- [x] Essential query indexes exist and are documented.
+- [ ] Registry screens handle loading, empty, error, and no-results states.
+- [ ] Desktop, tablet, and mobile layouts are reviewed.
+- [ ] Keyboard, focus, label, and contrast checks pass.
+>>>>>>> dd65f3202fd0737397f80c094295b307d3f27d4c
 - [x] Mandatory business-rule tests pass.
 - [ ] Fresh migration + seed + complete demo flow pass.
 
-Verification note (2026-07-12): Teammate 3 Phase 4 mandatory business-rule matrix was run against a reset MySQL seed before and after integration verification. `npm run test --workspace=apps/api` passed 20/20 both times, covering dispatch rejection/success rules, lifecycle completion/cancellation, maintenance open/close, RBAC-adjacent integration checks, and audit assertions.
+Verification note (2026-07-12): Teammate 3 Phase 4 mandatory business-rule matrix was run against a reset MySQL seed before and after integration verification. `npm run test --workspace=apps/api` passed 20/20 both times, covering dispatch rejection/success rules, lifecycle completion/cancellation, maintenance open/close, RBAC-adjacent integration checks, and audit assertions. Additionally, Teammate 1 checked and confirmed SQL parameters, role middleware checks on routes, session/token logging exclusions, and verified the database indexes against the initial schema.
+
+Verification note (2026-07-12, Teammate 4): A clean `npm.cmd run db:reset` followed by `npm.cmd run test` passed 23/23 API checks. New finance/report evidence asserts the deterministic MySQL seed metrics (25% utilisation, INR 4,850 operational cost, -3.06% fleet ROI; completed van 10 km/L and -22% ROI) and CSV escaping/totals. Both API and web production builds pass. The database was reset again after verification so the seeded demo state is ready.
 
 Frontend verification note (2026-07-12): Teammate 2 hardened the app shell, login quick-select, dashboard, vehicle/driver forms, trip panels, and shared loading grids for token-aligned responsive behaviour at mobile/tablet/desktop widths. Focus visibility remains covered by the global `:focus-visible` rule, labels and alert live regions are present on owner forms, and owner registry screens expose loading, empty/no-results, and error states. Verified with `npm.cmd run build --workspace=apps/web`, `npm.cmd run build --workspace=apps/api`, `npm.cmd run db:reset`, and `npm.cmd run test` passing 20/20.
 

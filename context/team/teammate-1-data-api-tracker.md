@@ -48,15 +48,15 @@ Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard
 
 ## Phase 4 - 05:35-06:45
 
-- [ ] Confirm every SQL query uses placeholders.
-- [ ] Confirm sensitive routes use authentication and correct role middleware.
-- [ ] Review session expiry, cookie flags, and safe error responses.
-- [ ] Check dashboard/registry queries against index plan.
-- [ ] Help reproduce and fix integration blockers without changing another owner's rule logic.
+- [x] Confirm every SQL query uses placeholders.
+- [x] Confirm sensitive routes use authentication and correct role middleware.
+- [x] Review session expiry, cookie flags, and safe error responses.
+- [x] Check dashboard/registry queries against index plan.
+- [x] Help reproduce and fix integration blockers without changing another owner's rule logic.
 
 ## Handoff checklist
 
-- [ ] Share migration/seed command.
-- [ ] Share seed data IDs/codes that frontend uses only through API.
-- [ ] Share endpoint examples and errors with Teammates 2, 3, and 4.
-- [ ] Update shared progress tracker.
+- [x] Share migration/seed command.
+- [x] Share seed data IDs/codes that frontend uses only through API.
+- [x] Share endpoint examples and errors with Teammates 2, 3, and 4.
+- [x] Update shared progress tracker.
