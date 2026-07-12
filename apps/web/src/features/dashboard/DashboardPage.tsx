@@ -7,9 +7,7 @@ import { EmptyState } from '../../components/EmptyState.tsx';
 import { FilterBar, FilterConfig } from '../../components/FilterBar.tsx';
 import { ErrorAlert } from '../../components/ErrorAlert.tsx';
 import {
-  fetchDashboardKPIs,
-  fetchRecentTrips,
-  fetchVehicleStatusCounts,
+  fetchDashboardData,
   DashboardKPIs,
   RecentTrip,
   VehicleStatusCount,
@@ -63,20 +61,20 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
     setLoading(true);
     setError(null);
     try {
-      const [kpiData, trips, counts] = await Promise.all([
-        fetchDashboardKPIs(),
-        fetchRecentTrips(),
-        fetchVehicleStatusCounts(),
-      ]);
-      setKpis(kpiData);
-      setRecentTrips(trips);
-      setStatusCounts(counts);
+      const data = await fetchDashboardData({
+        vehicleType: filterType || undefined,
+        status: filterStatus || undefined,
+        region: filterRegion || undefined,
+      });
+      setKpis(data.kpis);
+      setRecentTrips(data.recentTrips);
+      setStatusCounts(data.statusCounts);
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filterRegion, filterStatus, filterType]);
 
   useEffect(() => { loadData(); }, [loadData]);
 

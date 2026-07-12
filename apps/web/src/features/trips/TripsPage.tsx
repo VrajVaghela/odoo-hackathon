@@ -293,7 +293,7 @@ const CompleteTripPanel: React.FC<CompleteTripPanelProps> = ({ trip, onCompleted
     const val = Number(actualKm);
     if (!Number.isFinite(val) || val <= 0) { setError('Enter a positive distance.'); return; }
     if (val > 99999) { setError('Value seems unrealistic (max 99,999 km).'); return; }
-    if (val > maxAllowed) { setError(`Distance exceeds 3× the planned ${Number(trip.planned_distance_km)} km limit (${maxAllowed} km max).`); return; }
+    if (val > maxAllowed) { setError(`Distance exceeds 3 times the planned ${Number(trip.planned_distance_km)} km limit (${maxAllowed} km max).`); return; }
     setPending(true);
     try {
       const { trip: updated, message } = await completeTrip(trip.id, val);
@@ -327,7 +327,7 @@ const CompleteTripPanel: React.FC<CompleteTripPanelProps> = ({ trip, onCompleted
           />
         </FormField>
         {showDeviation && (
-          <div style={{ paddingTop: 'calc(var(--space-4) + 1.25em)', fontSize: 'var(--text-xs)', color: deviation > 0 ? 'var(--color-warning, #f0a04b)' : 'var(--color-success)' }}>
+          <div style={{ paddingTop: 'calc(var(--space-4) + 1.25em)', fontSize: 'var(--text-xs)', color: deviation > 0 ? 'var(--color-warning)' : 'var(--color-success)' }}>
             {deviation > 0 ? `+${deviation.toFixed(1)} km over plan` : deviation < 0 ? `${deviation.toFixed(1)} km under plan` : 'Exactly on plan ✓'}
           </div>
         )}

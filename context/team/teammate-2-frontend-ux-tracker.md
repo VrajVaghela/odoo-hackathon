@@ -36,11 +36,11 @@ Primary responsibility: tokenised design system, responsive app shell, login, da
 
 ## Phase 3 - 03:50-05:35
 
-- [ ] Integrate shared form/modal/status primitives with trip and maintenance feature components from Teammate 3.
+- [x] Integrate shared form/modal/status primitives with trip and maintenance feature components from Teammate 3.
 - [x] Keep dashboard/registry data refreshed after mutations.
-- [ ] Polish high-signal visual details: spacing, hierarchy, table readability, semantic chips, and empty states.
+- [x] Polish high-signal visual details: spacing, hierarchy, table readability, semantic chips, and empty states.
 
-Progress note (2026-07-12): Phase 2 screens are complete and consuming the live API. Trip feature components are integrated in TripsPage; the maintenance feature UI is still a placeholder (blocked on Teammate 3 maintenance screen handoff), so the trip/maintenance integration item stays open.
+Progress note (2026-07-12): Phase 2 screens are complete and consuming the live API. Phase 3 trip workflow remains integrated in TripsPage, and MaintenancePage now uses the live maintenance API with shared form, status, error, empty, loading, and confirmation primitives. The dashboard client now consumes the role-safe `/api/v1/dashboard` read model instead of registry endpoints, fixing the Dispatcher empty-dashboard integration defect. Verified with `npm.cmd run build --workspace=apps/web`.
 
 ## Phase 4 - 05:35-06:45
 
