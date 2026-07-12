@@ -112,3 +112,30 @@ export async function fetchDispatchOptions(): Promise<{
     await fetch('/api/v1/trips/dispatch-options')
   );
 }
+
+export async function completeTrip(
+  tripId: number,
+  actualDistanceKm: number
+): Promise<{ trip: Trip; message: string }> {
+  return handleResponse<{ trip: Trip; message: string }>(
+    await fetch(`/api/v1/trips/${tripId}/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ actual_distance_km: actualDistanceKm }),
+    })
+  );
+}
+
+export async function cancelTrip(
+  tripId: number,
+  reason?: string
+): Promise<{ trip: Trip; message: string }> {
+  return handleResponse<{ trip: Trip; message: string }>(
+    await fetch(`/api/v1/trips/${tripId}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    })
+  );
+}
+

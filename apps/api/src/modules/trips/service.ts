@@ -2,7 +2,7 @@ import { withTransaction } from '../../db/transaction.js';
 import { BusinessRuleViolationError, ResourceNotFoundError } from '../../shared/errors/index.js';
 import { TripRepository } from './repository.js';
 import { Trip, TRIP_STATUS } from './types.js';
-import { CreateTripInput, DispatchTripInput } from './validator.js';
+import { CreateTripInput, DispatchTripInput, CompleteTripInput, CancelTripInput } from './validator.js';
 
 const repo = new TripRepository();
 
@@ -179,6 +179,131 @@ export class TripService {
       await repo.insertAuditLog(conn, actorUserId, 'driver', input.driver_id, 'DRIVER_STATUS_CHANGED', {
         status: driver.status,
       }, { status: 'ON_TRIP' });
+
+      const updated = await repo.findByIdForUpdate(conn, tripId);
+      return updated!;
+    });
+  }
+
+  /**
+   * Completes a DISPATCHED trip.
+   *
+   * Rules enforced under SELECT FOR UPDATE:
+   *  - Trip must be in DISPATCHED status.
+   *  - actual_distance_km must be a positive number (further capped at 3× planned).
+   *  - Vehicle and driver are restored to AVAILABLE atomically.
+   *  - Vehicle odometer is incremented by actual distance.
+   */
+  async completeTrip(
+    tripId: number,
+    input: CompleteTripInput,
+    actorUserId: number | null
+  ): Promise<Trip> {
+    return withTransaction(async (conn) => {
+      const trip = await repo.findByIdForUpdate(conn, tripId);
+      if (!trip) {
+        throw new ResourceNotFoundError(`Trip ${tripId} not found.`);
+      }
+
+      if (trip.status !== TRIP_STATUS.DISPATCHED) {
+        throw new BusinessRuleViolationError(
+          'INVALID_TRIP_STATUS',
+          `Trip ${trip.trip_code} is in ${trip.status} status. Only DISPATCHED trips can be completed.`
+        );
+      }
+
+      // Odometer sanity: actual distance must not exceed 3× planned distance
+      const plannedKm = Number(trip.planned_distance_km);
+      const actualKm = input.actual_distance_km;
+      const maxAllowed = plannedKm * 3;
+      if (actualKm > maxAllowed) {
+        throw new BusinessRuleViolationError(
+          'DISTANCE_EXCEEDS_LIMIT',
+          `Actual distance ${actualKm} km is more than 3× the planned ${plannedKm} km. Verify the odometer reading.`,
+          'actual_distance_km'
+        );
+      }
+
+      const vehicleId = trip.vehicle_id!;
+      const driverId = trip.driver_id!;
+
+      // Lock vehicle and driver rows before updating
+      await repo.findVehicleForUpdate(conn, vehicleId);
+      await repo.findDriverForUpdate(conn, driverId);
+
+      const beforeTrip = { status: trip.status, actual_distance_km: trip.actual_distance_km };
+      await repo.completeTrip(conn, tripId, vehicleId, driverId, actualKm);
+
+      await repo.insertAuditLog(conn, actorUserId, 'trip', tripId, 'TRIP_COMPLETED', beforeTrip, {
+        status: TRIP_STATUS.COMPLETED,
+        actual_distance_km: actualKm,
+      });
+      await repo.insertAuditLog(conn, actorUserId, 'vehicle', vehicleId, 'VEHICLE_STATUS_CHANGED',
+        { status: 'ON_TRIP' }, { status: 'AVAILABLE', odometer_increment_km: actualKm });
+      await repo.insertAuditLog(conn, actorUserId, 'driver', driverId, 'DRIVER_STATUS_CHANGED',
+        { status: 'ON_TRIP' }, { status: 'AVAILABLE' });
+
+      const updated = await repo.findByIdForUpdate(conn, tripId);
+      return updated!;
+    });
+  }
+
+  /**
+   * Cancels a DRAFT or DISPATCHED trip.
+   *
+   * Rules enforced under SELECT FOR UPDATE:
+   *  - Trip must be in DRAFT or DISPATCHED status. COMPLETED/CANCELLED cannot be cancelled.
+   *  - If DISPATCHED: vehicle and driver are restored to AVAILABLE atomically.
+   *  - If DRAFT: no vehicle/driver was assigned, so no restore is needed.
+   */
+  async cancelTrip(
+    tripId: number,
+    input: CancelTripInput,
+    actorUserId: number | null
+  ): Promise<Trip> {
+    return withTransaction(async (conn) => {
+      const trip = await repo.findByIdForUpdate(conn, tripId);
+      if (!trip) {
+        throw new ResourceNotFoundError(`Trip ${tripId} not found.`);
+      }
+
+      if (trip.status === TRIP_STATUS.COMPLETED) {
+        throw new BusinessRuleViolationError(
+          'TRIP_ALREADY_COMPLETED',
+          `Trip ${trip.trip_code} is already completed and cannot be cancelled.`
+        );
+      }
+      if (trip.status === TRIP_STATUS.CANCELLED) {
+        throw new BusinessRuleViolationError(
+          'TRIP_ALREADY_CANCELLED',
+          `Trip ${trip.trip_code} is already cancelled.`
+        );
+      }
+
+      const wasDispatched = trip.status === TRIP_STATUS.DISPATCHED;
+      const vehicleId = wasDispatched ? trip.vehicle_id : null;
+      const driverId = wasDispatched ? trip.driver_id : null;
+
+      // Lock vehicle and driver rows if they were assigned
+      if (vehicleId !== null) await repo.findVehicleForUpdate(conn, vehicleId);
+      if (driverId !== null) await repo.findDriverForUpdate(conn, driverId);
+
+      const beforeTrip = { status: trip.status };
+      await repo.cancelTrip(conn, tripId, vehicleId, driverId);
+
+      await repo.insertAuditLog(conn, actorUserId, 'trip', tripId, 'TRIP_CANCELLED', beforeTrip, {
+        status: TRIP_STATUS.CANCELLED,
+        reason: input.reason ?? null,
+      });
+
+      if (wasDispatched && vehicleId !== null) {
+        await repo.insertAuditLog(conn, actorUserId, 'vehicle', vehicleId, 'VEHICLE_STATUS_CHANGED',
+          { status: 'ON_TRIP' }, { status: 'AVAILABLE' });
+      }
+      if (wasDispatched && driverId !== null) {
+        await repo.insertAuditLog(conn, actorUserId, 'driver', driverId, 'DRIVER_STATUS_CHANGED',
+          { status: 'ON_TRIP' }, { status: 'AVAILABLE' });
+      }
 
       const updated = await repo.findByIdForUpdate(conn, tripId);
       return updated!;

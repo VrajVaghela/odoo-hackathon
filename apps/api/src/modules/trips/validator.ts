@@ -77,3 +77,47 @@ export function validateDispatchTripInput(body: unknown): DispatchTripInput {
 
   return { vehicle_id: vehicleId, driver_id: driverId };
 }
+
+export interface CompleteTripInput {
+  actual_distance_km: number;
+}
+
+/**
+ * Validates trip completion input.
+ * actual_distance_km must be a positive number within a reasonable deviation
+ * from the planned distance (no more than 3× the planned distance).
+ * Throws ValidationError on failure.
+ */
+export function validateCompleteTripInput(body: unknown): CompleteTripInput {
+  if (typeof body !== 'object' || body === null) {
+    throw new ValidationError('Request body must be a JSON object.');
+  }
+  const b = body as Record<string, unknown>;
+
+  const actualDistanceKm = Number(b.actual_distance_km);
+  if (!Number.isFinite(actualDistanceKm) || actualDistanceKm <= 0) {
+    throw new ValidationError('actual_distance_km must be a positive number.', 'actual_distance_km');
+  }
+  if (actualDistanceKm > 99999) {
+    throw new ValidationError('actual_distance_km value seems unrealistic (max 99,999 km).', 'actual_distance_km');
+  }
+
+  return { actual_distance_km: actualDistanceKm };
+}
+
+export interface CancelTripInput {
+  reason?: string;
+}
+
+/**
+ * Validates optional cancellation reason.
+ */
+export function validateCancelTripInput(body: unknown): CancelTripInput {
+  if (typeof body !== 'object' || body === null) {
+    return {};
+  }
+  const b = body as Record<string, unknown>;
+  const reason = typeof b.reason === 'string' ? b.reason.trim().slice(0, 500) : undefined;
+  return { reason };
+}
+

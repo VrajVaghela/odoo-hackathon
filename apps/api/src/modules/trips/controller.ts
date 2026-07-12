@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { TripService } from './service.js';
-import { validateCreateTripInput, validateDispatchTripInput } from './validator.js';
+import { validateCreateTripInput, validateDispatchTripInput, validateCompleteTripInput, validateCancelTripInput } from './validator.js';
 import { AuthenticatedRequest } from '../../middleware/auth.js';
 
 const tripService = new TripService();
@@ -97,3 +97,48 @@ export async function getDispatchOptions(
     next(err);
   }
 }
+
+/**
+ * POST /api/v1/trips/:id/complete
+ * Marks a DISPATCHED trip as COMPLETED; records actual distance and restores availability.
+ */
+export async function completeTrip(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const tripId = Number(req.params.id);
+    const input = validateCompleteTripInput(req.body);
+    const trip = await tripService.completeTrip(tripId, input, req.user?.id ?? null);
+    res.status(200).json({
+      trip,
+      message: `${trip.trip_code} marked as completed. Vehicle and driver are now available.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/trips/:id/cancel
+ * Cancels a DRAFT or DISPATCHED trip; safely restores vehicle/driver availability.
+ */
+export async function cancelTrip(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const tripId = Number(req.params.id);
+    const input = validateCancelTripInput(req.body);
+    const trip = await tripService.cancelTrip(tripId, input, req.user?.id ?? null);
+    res.status(200).json({
+      trip,
+      message: `${trip.trip_code} has been cancelled.`,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+

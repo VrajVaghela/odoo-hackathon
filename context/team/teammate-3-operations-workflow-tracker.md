@@ -38,8 +38,8 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 
 ## Phase 3 - 03:50-05:35
 
-- [ ] Implement trip completion with actual distance/odometer validation.
-- [ ] Implement dispatched-trip cancellation and safe availability restore.
+- [x] Implement trip completion with actual distance/odometer validation.
+- [x] Implement dispatched-trip cancellation and safe availability restore.
 - [ ] Implement open-maintenance transaction and In Shop transition.
 - [ ] Implement close-maintenance transaction and conditional Available restore.
 - [ ] Build maintenance log/form/status experience.

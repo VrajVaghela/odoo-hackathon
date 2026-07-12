@@ -6,12 +6,13 @@ import {
   listTrips,
   getTrip,
   getDispatchOptions,
+  completeTrip,
+  cancelTrip,
 } from './controller.js';
 
 const router = Router();
 
-// GET /api/v1/trips/dispatch-options - Available vehicles and drivers for form (Dispatcher, Fleet Manager)
-// Must be registered before /:id routes to avoid being matched as an id
+// GET /api/v1/trips/dispatch-options — must be registered BEFORE /:id
 router.get(
   '/dispatch-options',
   authenticate,
@@ -19,7 +20,7 @@ router.get(
   getDispatchOptions
 );
 
-// GET /api/v1/trips - List trips with optional status filter (Dispatcher, Fleet Manager)
+// GET /api/v1/trips
 router.get(
   '/',
   authenticate,
@@ -27,7 +28,7 @@ router.get(
   listTrips
 );
 
-// POST /api/v1/trips - Create a new DRAFT trip (Dispatcher)
+// POST /api/v1/trips — create DRAFT
 router.post(
   '/',
   authenticate,
@@ -35,7 +36,7 @@ router.post(
   createTrip
 );
 
-// GET /api/v1/trips/:id - Get a single trip (Dispatcher, Fleet Manager)
+// GET /api/v1/trips/:id
 router.get(
   '/:id',
   authenticate,
@@ -43,12 +44,28 @@ router.get(
   getTrip
 );
 
-// POST /api/v1/trips/:id/dispatch - Dispatch a DRAFT trip (Dispatcher)
+// POST /api/v1/trips/:id/dispatch — DRAFT → DISPATCHED
 router.post(
   '/:id/dispatch',
   authenticate,
   requireRole(['DISPATCHER']),
   dispatchTrip
+);
+
+// POST /api/v1/trips/:id/complete — DISPATCHED → COMPLETED
+router.post(
+  '/:id/complete',
+  authenticate,
+  requireRole(['DISPATCHER']),
+  completeTrip
+);
+
+// POST /api/v1/trips/:id/cancel — DRAFT|DISPATCHED → CANCELLED
+router.post(
+  '/:id/cancel',
+  authenticate,
+  requireRole(['DISPATCHER']),
+  cancelTrip
 );
 
 export default router;

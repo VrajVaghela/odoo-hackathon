@@ -102,6 +102,68 @@ export class TripRepository {
   }
 
   /**
+   * Completes a DISPATCHED trip:
+   * - Sets trip status = COMPLETED with actual_distance_km and completed_at
+   * - Increments vehicle odometer by actual distance
+   * - Restores vehicle and driver to AVAILABLE
+   */
+  async completeTrip(
+    connection: PoolConnection,
+    tripId: number,
+    vehicleId: number,
+    driverId: number,
+    actualDistanceKm: number
+  ): Promise<void> {
+    await connection.query(
+      `UPDATE trips
+         SET status = 'COMPLETED', actual_distance_km = ?, completed_at = NOW()
+       WHERE id = ?`,
+      [actualDistanceKm, tripId]
+    );
+    await connection.query(
+      `UPDATE vehicles
+         SET status = 'AVAILABLE', odometer_km = odometer_km + ?
+       WHERE id = ?`,
+      [actualDistanceKm, vehicleId]
+    );
+    await connection.query(
+      "UPDATE drivers SET status = 'AVAILABLE' WHERE id = ?",
+      [driverId]
+    );
+  }
+
+  /**
+   * Cancels a DRAFT or DISPATCHED trip:
+   * - Sets trip status = CANCELLED
+   * - Restores vehicle and driver to AVAILABLE only if they were ON_TRIP
+   *   (a DRAFT trip has no vehicle/driver assigned yet)
+   */
+  async cancelTrip(
+    connection: PoolConnection,
+    tripId: number,
+    vehicleId: number | null,
+    driverId: number | null
+  ): Promise<void> {
+    await connection.query(
+      "UPDATE trips SET status = 'CANCELLED' WHERE id = ?",
+      [tripId]
+    );
+    if (vehicleId !== null) {
+      await connection.query(
+        "UPDATE vehicles SET status = 'AVAILABLE' WHERE id = ? AND status = 'ON_TRIP'",
+        [vehicleId]
+      );
+    }
+    if (driverId !== null) {
+      await connection.query(
+        "UPDATE drivers SET status = 'AVAILABLE' WHERE id = ? AND status = 'ON_TRIP'",
+        [driverId]
+      );
+    }
+  }
+
+
+  /**
    * Lists trips with optional status filter, ordered by most recent first.
    */
   async listTrips(status?: string): Promise<Trip[]> {
