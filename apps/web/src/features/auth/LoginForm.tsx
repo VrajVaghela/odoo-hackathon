@@ -163,7 +163,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
 
   const gridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 11rem), 1fr))',
     gap: 'var(--space-2)',
   };
 
@@ -253,7 +253,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
               disabled={pending}
             >
               <span style={{ fontWeight: 700, color: 'var(--color-primary)' }}>{acc.label}</span>
-              <span style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>{acc.email}</span>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>{acc.email}</span>
             </button>
           ))}
         </div>

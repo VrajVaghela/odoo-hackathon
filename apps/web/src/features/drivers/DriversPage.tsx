@@ -293,8 +293,8 @@ export const DriversPage: React.FC<DriversPageProps> = ({ userRole: _userRole })
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', justifyContent: 'center' }}>
             {/* Mini bar */}
             <div style={{
-              width: '48px',
-              height: '6px',
+              width: 'var(--space-10)',
+              height: 'var(--space-2)',
               backgroundColor: 'var(--color-surface)',
               borderRadius: '3px',
               overflow: 'hidden',
@@ -399,7 +399,7 @@ export const DriversPage: React.FC<DriversPageProps> = ({ userRole: _userRole })
               backgroundColor: 'var(--color-surface-raised)',
               border: '1px solid var(--color-border)',
               borderRadius: 'var(--radius-lg)',
-              maxWidth: '520px',
+              maxWidth: 'min(100%, 33rem)',
               width: '100%',
               maxHeight: '90vh',
               overflow: 'auto',
@@ -417,7 +417,7 @@ export const DriversPage: React.FC<DriversPageProps> = ({ userRole: _userRole })
               )}
 
               <form onSubmit={handleFormSubmit} noValidate>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 var(--space-4)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 15rem), 1fr))', gap: '0 var(--space-4)' }}>
                   <FormField label="Full Name" id="fname" error={formErrors.full_name} required>
                     <input
                       id="fname"

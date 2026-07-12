@@ -132,7 +132,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
       {loading ? (
         <LoadingState variant="kpi" />
       ) : kpis ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 12rem), 1fr))', gap: 'var(--space-4)' }}>
           <MetricCard
             label="Total Vehicles"
             value={kpis.totalVehicles}
@@ -173,7 +173,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
       ) : null}
 
       {/* Two-column: Recent Trips + Vehicle Status */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 'var(--space-4)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 22rem), 1fr))', gap: 'var(--space-4)' }}>
         {/* Recent Trips */}
         <div style={cardStyle}>
           <h3 style={sectionTitleStyle}>Recent Trips</h3>
@@ -241,7 +241,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
               {/* Stacked bar */}
               <div style={{
                 display: 'flex',
-                height: '24px',
+                height: 'var(--space-6)',
                 borderRadius: 'var(--radius-sm)',
                 overflow: 'hidden',
                 marginBottom: 'var(--space-4)',
@@ -254,7 +254,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
                       width: totalVehiclesForBar > 0 ? `${(sc.count / totalVehiclesForBar) * 100}%` : '0',
                       backgroundColor: statusColorMap[sc.status] || 'var(--color-neutral)',
                       transition: 'width 0.3s ease',
-                      minWidth: sc.count > 0 ? '4px' : '0',
+                      minWidth: sc.count > 0 ? 'var(--space-1)' : '0',
                     }}
                     title={`${sc.status}: ${sc.count}`}
                   />
@@ -267,9 +267,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userRole: _userRol
                   <div key={sc.status} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                       <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '2px',
+                        width: 'var(--space-3)',
+                        height: 'var(--space-3)',
+                        borderRadius: 'var(--radius-sm)',
                         backgroundColor: statusColorMap[sc.status] || 'var(--color-neutral)',
                         flexShrink: 0,
                       }} />

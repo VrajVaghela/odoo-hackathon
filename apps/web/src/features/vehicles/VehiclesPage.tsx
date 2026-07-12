@@ -310,7 +310,7 @@ export const VehiclesPage: React.FC<VehiclesPageProps> = ({ userRole: _userRole 
     backgroundColor: 'var(--color-surface-raised)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-lg)',
-    maxWidth: '560px',
+    maxWidth: 'min(100%, 35rem)',
     width: '100%',
     maxHeight: '90vh',
     overflow: 'auto',
@@ -371,7 +371,7 @@ export const VehiclesPage: React.FC<VehiclesPageProps> = ({ userRole: _userRole 
               )}
 
               <form onSubmit={handleFormSubmit} noValidate>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 var(--space-4)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 15rem), 1fr))', gap: '0 var(--space-4)' }}>
                   <FormField label="Registration Number" id="reg" error={formErrors.registration_number} required>
                     <input
                       id="reg"

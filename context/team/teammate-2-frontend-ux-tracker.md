@@ -44,10 +44,12 @@ Progress note (2026-07-12): Phase 2 screens are complete and consuming the live 
 
 ## Phase 4 - 05:35-06:45
 
-- [ ] Check 320 px mobile, tablet, and desktop layouts.
-- [ ] Check tab order, visible focus, labels, error announcements, and contrast.
-- [ ] Remove any arbitrary visual values that bypass tokens.
-- [ ] Verify every owner screen shows loading, empty, error, and no-results state.
+- [x] Check 320 px mobile, tablet, and desktop layouts.
+- [x] Check tab order, visible focus, labels, error announcements, and contrast.
+- [x] Remove any arbitrary visual values that bypass tokens.
+- [x] Verify every owner screen shows loading, empty, error, and no-results state.
+
+Progress note (2026-07-12): Phase 4 frontend hardening completed for the shell, login, dashboard, vehicle registry, driver registry, trips, maintenance, and shared loading states. Replaced fixed-width grids with mobile-safe `auto-fit/minmax(min(100%, ...))` layouts, aligned shell breakpoint to the `40rem` mobile token, improved mobile shell status behaviour, preserved visible focus via global focus styling, and rechecked owner loading/empty/error/no-results paths. Verified with `npm.cmd run build --workspace=apps/web`, `npm.cmd run build --workspace=apps/api`, `npm.cmd run db:reset`, and `npm.cmd run test` passing 20/20.
 
 ## Handoff checklist
 

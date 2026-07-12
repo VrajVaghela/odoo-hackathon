@@ -96,7 +96,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     borderBottom: '1px solid var(--color-border)',
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: 'var(--space-1)',
   };
 
   const navListStyle: React.CSSProperties = {
@@ -149,9 +149,9 @@ export const AppShell: React.FC<AppShellProps> = ({
     alignSelf: 'flex-start',
     backgroundColor: 'var(--color-primary)',
     color: 'var(--color-primary-contrast)',
-    fontSize: '10px',
+    fontSize: 'var(--text-xs)',
     fontWeight: 700,
-    padding: '2px var(--space-2)',
+    padding: 'var(--space-1) var(--space-2)',
     borderRadius: 'var(--radius-sm)',
     textTransform: 'uppercase',
   };
@@ -216,14 +216,13 @@ export const AppShell: React.FC<AppShellProps> = ({
     margin: '0 auto',
   };
 
-  // Determine if mobile via CSS class strategy
-  const isMobileQuery = '@media (max-width: 768px)';
+  const isMobileQuery = '@media (max-width: 40rem)';
 
   const SidebarContent = (
     <>
       <div style={logoAreaStyle}>
         <span style={{ fontSize: 'var(--text-lg)', fontWeight: 800, color: 'var(--color-text)' }}>TransitOps</span>
-        <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Operations Board</span>
+        <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>Operations Board</span>
       </div>
 
       <nav style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -284,12 +283,15 @@ export const AppShell: React.FC<AppShellProps> = ({
         .appshell-sidebar-mobile { display: none; }
         .appshell-hamburger { display: none !important; }
         .appshell-overlay { display: none; }
+        .appshell-mobile-status { display: flex; }
 
         ${isMobileQuery} {
           .appshell-sidebar-desktop { display: none !important; }
           .appshell-sidebar-mobile { display: flex !important; }
           .appshell-hamburger { display: block !important; }
           .appshell-overlay { display: block !important; }
+          .appshell-content { padding: var(--space-4) !important; }
+          .appshell-mobile-status { display: none !important; }
         }
       `}</style>
 
@@ -321,6 +323,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                 style={hamburgerStyle}
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="Toggle navigation"
+                aria-expanded={mobileOpen}
               >
                 ☰
               </button>
@@ -328,15 +331,15 @@ export const AppShell: React.FC<AppShellProps> = ({
                 {navigationItems.find((item) => item.id === currentPage)?.label || 'Console'}
               </h1>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+            <div className="appshell-mobile-status" style={{ alignItems: 'center', gap: 'var(--space-4)' }}>
               <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
                 Server Connected
               </span>
-              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--color-success)' }} />
+              <div style={{ width: 'var(--space-2)', height: 'var(--space-2)', borderRadius: '50%', backgroundColor: 'var(--color-success)' }} />
             </div>
           </header>
 
-          <main style={contentContainerStyle}>
+          <main className="appshell-content" style={contentContainerStyle}>
             {children}
           </main>
         </div>

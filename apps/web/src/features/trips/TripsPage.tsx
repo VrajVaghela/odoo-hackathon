@@ -167,7 +167,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onCreated }) => {
       )}
       {apiError && <ErrorAlert message={apiError} onDismiss={() => setApiError(null)} />}
       <form onSubmit={handleSubmit} noValidate>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: 'var(--space-4)' }}>
           <FormField label="Source" id="trip-source" error={errors.source} required>
             <input id="trip-source" type="text" value={form.source} onChange={e => setField('source', e.target.value)} placeholder="e.g. Mumbai Depot" style={inputStyle(!!errors.source)} disabled={pending} />
           </FormField>
@@ -245,7 +245,7 @@ const DispatchPanel: React.FC<DispatchPanelProps> = ({ trip, onDispatched }) => 
     <div style={panelStyle}>
       <div style={panelLabelStyle}>Dispatch Configuration</div>
       {displayConflict && <DispatchEligibilityNotice conflict={displayConflict} />}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: 'var(--space-3)', marginBottom: 'var(--space-3)' }}>
         <FormField label="Assign Vehicle" id={`v-${trip.id}`}>
           <select id={`v-${trip.id}`} value={vehicleId} onChange={e => { setVehicleId(e.target.value); setConflict(null); }} style={selectStyle()} disabled={pending}>
             <option value="">— Select vehicle —</option>
@@ -311,7 +311,7 @@ const CompleteTripPanel: React.FC<CompleteTripPanelProps> = ({ trip, onCompleted
   return (
     <div style={panelStyle}>
       <div style={panelLabelStyle}>Record Trip Completion</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', alignItems: 'start', marginBottom: 'var(--space-3)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: 'var(--space-4)', alignItems: 'start', marginBottom: 'var(--space-3)' }}>
         <FormField label="Actual Distance" id={`actual-km-${trip.id}`} error={error ?? undefined} required unit="km"
           helpText={`Planned: ${Number(trip.planned_distance_km).toFixed(1)} km · Max allowed: ${maxAllowed.toFixed(0)} km`}>
           <input
@@ -434,7 +434,7 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onUpdated }) => {
     fontSize: 'var(--text-sm)',
     fontWeight: 700,
     color: 'var(--color-primary)',
-    minWidth: '80px',
+    minWidth: 'min(100%, 5rem)',
   };
 
   const actionsStyle: React.CSSProperties = {
@@ -449,7 +449,7 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onUpdated }) => {
       {/* Header row */}
       <div style={headerStyle}>
         <span style={codeStyle}>{trip.trip_code}</span>
-        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text)', flex: 1, minWidth: '140px' }}>
+        <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text)', flex: 1, minWidth: 'min(100%, 9rem)' }}>
           {trip.source} → {trip.destination}
         </span>
         <div style={{ display: 'flex', gap: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', flexWrap: 'wrap' }}>
@@ -574,7 +574,7 @@ export const TripsPage: React.FC<TripsPageProps> = ({ userRole }) => {
     borderLeft: '4px solid var(--color-success)', borderRadius: 'var(--radius-md)',
     padding: 'var(--space-3) var(--space-5)', color: 'var(--color-text)',
     fontSize: 'var(--text-sm)', fontWeight: 600, boxShadow: 'var(--shadow-panel)',
-    zIndex: 1000, maxWidth: '420px', animation: 'slideUp 0.25s ease',
+    zIndex: 1000, maxWidth: 'min(100%, 26rem)', animation: 'slideUp 0.25s ease',
   };
 
   return (
@@ -613,9 +613,9 @@ export const TripsPage: React.FC<TripsPageProps> = ({ userRole }) => {
       <div style={cardStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
           <h3 style={{ ...sectionTitleStyle, marginBottom: 0 }}>Live Dispatch Board</h3>
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center', flexWrap: 'wrap' }}>
             <label htmlFor="status-filter" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', fontWeight: 600 }}>Filter:</label>
-            <select id="status-filter" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ ...selectStyle(), width: '150px' }}>
+            <select id="status-filter" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ ...selectStyle(), width: 'min(100%, 10rem)' }}>
               {['', 'DRAFT', 'DISPATCHED', 'COMPLETED', 'CANCELLED'].map(s => (
                 <option key={s} value={s}>{s || 'All Statuses'}</option>
               ))}
@@ -627,7 +627,7 @@ export const TripsPage: React.FC<TripsPageProps> = ({ userRole }) => {
 
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            {[1, 2, 3].map(i => <div key={i} style={{ height: '52px', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-surface-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />)}
+            {[1, 2, 3].map(i => <div key={i} style={{ minHeight: 'var(--control-height)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-surface-hover)', animation: 'pulse 1.5s ease-in-out infinite' }} />)}
           </div>
         ) : trips.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 'var(--space-10)', color: 'var(--color-text-muted)' }}>
