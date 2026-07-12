@@ -74,6 +74,13 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 - [ ] Lead two timed demo rehearsals.
 - [ ] Time each speaker and remove dead clicks/loading waits.
-- [ ] Prepare fallback path if a seeded record is unexpectedly changed.
+- [x] Prepare fallback path if a seeded record is unexpectedly changed.
 - [ ] Capture screenshots/evidence if submission asks for it.
 - [ ] Update shared progress tracker and announce final quality-gate state.
+
+## Current Phase 5 preparation - 2026-07-12
+
+- Scope is frozen to reproducible demo-blocker fixes. The timed owner-based story, two-run record, reset fallback, and evidence checklist are in `teammate-4-phase5-demo-runbook.md`.
+- README now contains the local MySQL setup, reset, test, start, seeded-demo-account, and recovery commands. The fallback is always `npm.cmd run db:reset`; no manual database edits are needed.
+- Two clean preflight cycles passed: each ran `npm.cmd run db:reset`, 25/25 API tests, API build, web build, and a final reset. A live web-proxy smoke check also confirmed Financial Analyst login, 25% utilisation, INR 4,850 operational cost, -3.06% fleet ROI, and a CSV containing `FLEET TOTAL`.
+- Two browser rehearsals and any submission-requested screenshots remain pending and must be recorded before being marked complete.

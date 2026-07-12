@@ -70,11 +70,11 @@ npm run db:reset
 ```
 
 ### 5. Running the Application
-To start both the backend API server (listening on port 3001) and the frontend Vite server (listening on port 3000) concurrently, run:
+To start both the backend API server (listening on port 3001) and the frontend Vite server (listening on port 5173) concurrently, run:
 ```bash
 npm run dev
 ```
-Open `http://localhost:3000` in your browser to access the application shell.
+Open `http://localhost:5173` in your browser to access the application shell.
 
 ---
 
@@ -112,7 +112,9 @@ To demonstrate the local-first operations workflow, try this scenario:
 1. **Login as Dispatcher:** Open the `Trips & Dispatch` page to see the pending trip drafts.
 2. **Assign Available Resources:** Open the dispatch configuration panel on `TRP-103`. Select vehicle `KA-01-AA-1111` and driver `John Doe`. Click **Dispatch Trip**.
 3. **Confirm Availability Status Update:** Observe that the vehicle and driver status atomically updates to `ON_TRIP`.
-4. **Try Over-Capacity Rejection:** Try assigning vehicle `KA-01-AE-5555` to trip `TRP-105`. Note that the system blocks dispatch because the cargo weight (801 kg) exceeds the van's max capacity (500 kg).
+4. **Try Over-Capacity Rejection:** Try assigning vehicle `KA-01-AA-1111` to trip `TRP-105`. The system blocks dispatch because the cargo weight (801 kg) exceeds the van's 800 kg capacity.
 5. **Complete a Trip:** Mark the dispatched trip as completed, logging actual distance travelled. Watch driver and vehicle return to `AVAILABLE` status.
 6. **Open Maintenance as Fleet Manager:** Log in as `manager@transitops.com`. Put a vehicle into the shop. Note how its status changes to `IN_SHOP` and is instantly removed from dispatch availability.
 7. **View Financial Summary:** Log in as `finance@transitops.com` and review operational cost charts, fuel efficiency, ROI, and download the full reports sheet as a local CSV.
+
+For the timed owner-based story, reset fallback, and evidence checklist, use `context/team/teammate-4-phase5-demo-runbook.md`.

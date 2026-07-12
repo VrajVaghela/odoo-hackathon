@@ -81,3 +81,5 @@ Frontend verification note (2026-07-12): Teammate 2 hardened the app shell, logi
 - [x] Two full demo rehearsals pass.
 - [x] Screenshots/video evidence captured if required.
 - [x] Scope freeze observed; no untested bonus feature remains.
+
+Teammate 4 verification note (2026-07-12): Two clean preflight cycles passed (reset, 25/25 API tests, API build, web build, final reset); the live web proxy also verified Financial Analyst login, the seeded 25%/INR 4,850/-3.06% report values, and CSV totals. The runbook records the timed owner-based story, reset fallback, and evidence checklist.
