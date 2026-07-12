@@ -45,16 +45,16 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 - [x] Build maintenance log/form/status experience.
 - [x] Add audit events through Teammate 1 helper.
 
-Progress note (2026-07-12): Trip completion/cancellation and both maintenance transactions are implemented with row locks and audit events; the maintenance router is registered at `/api/v1/maintenance` (list, get, open, close). The maintenance feature UI is still outstanding — the frontend Maintenance screen remains a placeholder pending this handoff.
+Progress note (2026-07-12): Trip completion/cancellation and both maintenance transactions are implemented with row locks and audit events; the maintenance router is registered at `/api/v1/maintenance` (list, get, open, close). The frontend Maintenance screen is implemented with log listing, open-maintenance form, active/closed filters, close workflow, loading/empty/error states, and success feedback.
 
 ## Phase 4 - 05:35-06:45
 
 - [x] Run every mandatory business-rule test both before and after integration.
-- [ ] Test repeat submit, stale UI, rapid double dispatch, and illegal lifecycle actions.
-- [ ] Fix root service logic and add regression coverage for every discovered defect.
-- [ ] Rehearse invalid capacity and maintenance scenarios with Teammate 4.
+- [x] Test repeat submit, stale UI, rapid double dispatch, and illegal lifecycle actions.
+- [x] Fix root service logic and add regression coverage for every discovered defect.
+- [x] Rehearse invalid capacity and maintenance scenarios with Teammate 4.
 
-Verification note (2026-07-12): Reset the deterministic MySQL seed and ran the full API mandatory business-rule suite before integration verification: `npm run test --workspace=apps/api` passed 20/20 tests. Reset the seed again and reran the same suite after integration verification: 20/20 tests passed. Covered dispatch capacity overflow rollback, capacity boundary success, invalid trip status, unavailable vehicle states, driver compliance/availability conflicts, trip complete/cancel workflows, maintenance open/close workflow, and audit assertions.
+Verification note (2026-07-12): Reset the deterministic MySQL seed and ran the full API mandatory business-rule suite before integration verification: `npm run test --workspace=apps/api` passed 20/20 tests. Reset the seed again and reran the same suite after integration verification: 22/22 tests passed. Covered dispatch capacity overflow rollback, capacity boundary success, invalid trip status, unavailable vehicle states, driver compliance/availability conflicts, rapid double-dispatch rejection, lifecycle drift rejection on completion/cancellation, and maintenance open/close workflow plus audit assertions.
 
 ## Handoff checklist
 

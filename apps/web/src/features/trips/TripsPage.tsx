@@ -131,6 +131,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onCreated }) => {
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
+    if (pending) return;
     setApiError(null); setSuccessMsg(null);
     if (!validate()) return;
     setPending(true);
@@ -227,6 +228,7 @@ const DispatchPanel: React.FC<DispatchPanelProps> = ({ trip, onDispatched }) => 
   const today = new Date().toISOString().split('T')[0];
 
   const handleDispatch = async () => {
+    if (pending) return;
     setConflict(null);
     setPending(true);
     try {
@@ -289,6 +291,7 @@ const CompleteTripPanel: React.FC<CompleteTripPanelProps> = ({ trip, onCompleted
   const maxAllowed = Number(trip.planned_distance_km) * 3;
 
   const handleComplete = async () => {
+    if (pending) return;
     setError(null);
     const val = Number(actualKm);
     if (!Number.isFinite(val) || val <= 0) { setError('Enter a positive distance.'); return; }
@@ -358,6 +361,7 @@ const CancelTripPanel: React.FC<CancelTripPanelProps> = ({ trip, onCancelled, on
   const [pending, setPending] = useState(false);
 
   const handleCancel = async () => {
+    if (pending) return;
     setError(null);
     setPending(true);
     try {

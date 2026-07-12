@@ -128,6 +128,7 @@ test('dispatch API rule matrix uses the deterministic demo scenarios', async (t)
 
     const vanAvailable = await seedId('vehicles', 'registration_number', 'KA-01-AA-1111');
     const truckAvailable = await seedId('vehicles', 'registration_number', 'KA-01-AB-2222');
+    const alternateDriver = await seedId('drivers', 'licence_number', 'DL-22222');
     const vehicleOnTrip = await seedId('vehicles', 'registration_number', 'KA-01-AC-3333');
     const vehicleInShop = await seedId('vehicles', 'registration_number', 'KA-01-AD-4444');
     const vehicleRetired = await seedId('vehicles', 'registration_number', 'KA-01-AE-5555');
@@ -178,6 +179,44 @@ test('dispatch API rule matrix uses the deterministic demo scenarios', async (t)
       assert.equal((vehicleRows as Array<{ status: string }>)[0]?.status, 'ON_TRIP');
       assert.equal((driverRows as Array<{ status: string }>)[0]?.status, 'ON_TRIP');
       assert.ok((auditRows as Array<{ action: string }>).some((row) => row.action === 'TRIP_DISPATCHED'));
+    });
+
+    await t.test('rejects completion when the vehicle state no longer matches the trip lifecycle', async () => {
+      const driftTrip = await createDraft(600);
+      const dispatchResponse = await dispatch(driftTrip, truckAvailable, alternateDriver);
+      assert.equal(dispatchResponse.status, 200);
+
+      await pool.query('UPDATE vehicles SET status = ? WHERE id = ?', ['AVAILABLE', truckAvailable]);
+
+      const completeResponse = await fetch(`${baseUrl}/api/v1/trips/${driftTrip}/complete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          cookie: dispatcherCookie,
+        },
+        body: JSON.stringify({ actual_distance_km: 50 }),
+      });
+
+      assert.equal(completeResponse.status, 422);
+      const body = await completeResponse.json() as ApiError;
+      assert.equal(body.error.code, 'VEHICLE_NOT_ON_TRIP');
+
+      await pool.query('UPDATE vehicles SET status = ? WHERE id = ?', ['AVAILABLE', truckAvailable]);
+      await pool.query('UPDATE drivers SET status = ? WHERE id = ?', ['AVAILABLE', alternateDriver]);
+    });
+
+    await t.test('rejects a rapid double dispatch for the same trip', async () => {
+      const repeatedTrip = await createDraft(650);
+      const first = await dispatch(repeatedTrip, truckAvailable, alternateDriver);
+      assert.equal(first.status, 200);
+
+      const second = await dispatch(repeatedTrip, truckAvailable, alternateDriver);
+      assert.equal(second.status, 422);
+      const secondBody = await second.json() as ApiError;
+      assert.equal(secondBody.error.code, 'INVALID_TRIP_STATUS');
+
+      await pool.query('UPDATE vehicles SET status = ? WHERE id = ?', ['AVAILABLE', truckAvailable]);
+      await pool.query('UPDATE drivers SET status = ? WHERE id = ?', ['AVAILABLE', alternateDriver]);
     });
 
     await t.test('rejects a trip that is not in DRAFT status', async () => {

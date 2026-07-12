@@ -224,12 +224,38 @@ export class TripService {
         );
       }
 
-      const vehicleId = trip.vehicle_id!;
-      const driverId = trip.driver_id!;
+      const vehicleId = trip.vehicle_id;
+      const driverId = trip.driver_id;
+      if (!vehicleId || !driverId) {
+        throw new BusinessRuleViolationError(
+          'TRIP_NOT_ASSIGNED',
+          `Trip ${trip.trip_code} has no vehicle or driver assigned and cannot be completed.`
+        );
+      }
 
       // Lock vehicle and driver rows before updating
       const vehicle = await repo.findVehicleForUpdate(conn, vehicleId);
       const driver = await repo.findDriverForUpdate(conn, driverId);
+      if (!vehicle) {
+        throw new ResourceNotFoundError(`Vehicle ${vehicleId} not found.`);
+      }
+      if (!driver) {
+        throw new ResourceNotFoundError(`Driver ${driverId} not found.`);
+      }
+      if (vehicle.status !== 'ON_TRIP') {
+        throw new BusinessRuleViolationError(
+          'VEHICLE_NOT_ON_TRIP',
+          `Vehicle ${vehicle.registration_number} is not currently on a trip and cannot be completed.`,
+          'vehicle_id'
+        );
+      }
+      if (driver.status !== 'ON_TRIP') {
+        throw new BusinessRuleViolationError(
+          'DRIVER_NOT_ON_TRIP',
+          `Driver ${driver.full_name} is not currently on a trip and cannot be completed.`,
+          'driver_id'
+        );
+      }
 
       const beforeTrip = { status: trip.status, actual_distance_km: trip.actual_distance_km };
       await repo.completeTrip(conn, tripId, vehicleId, driverId, actualKm);
@@ -284,9 +310,35 @@ export class TripService {
       const vehicleId = wasDispatched ? trip.vehicle_id : null;
       const driverId = wasDispatched ? trip.driver_id : null;
 
-      // Lock vehicle and driver rows if they were assigned
-      if (vehicleId !== null) await repo.findVehicleForUpdate(conn, vehicleId);
-      if (driverId !== null) await repo.findDriverForUpdate(conn, driverId);
+      // Lock vehicle and driver rows if they were assigned and ensure they are still on trip.
+      let vehicle: any | null = null;
+      let driver: any | null = null;
+      if (vehicleId !== null) {
+        vehicle = await repo.findVehicleForUpdate(conn, vehicleId);
+        if (!vehicle) {
+          throw new ResourceNotFoundError(`Vehicle ${vehicleId} not found.`);
+        }
+        if (vehicle.status !== 'ON_TRIP') {
+          throw new BusinessRuleViolationError(
+            'VEHICLE_NOT_ON_TRIP',
+            `Vehicle ${vehicle.registration_number} is not currently on a trip and cannot be cancelled.`,
+            'vehicle_id'
+          );
+        }
+      }
+      if (driverId !== null) {
+        driver = await repo.findDriverForUpdate(conn, driverId);
+        if (!driver) {
+          throw new ResourceNotFoundError(`Driver ${driverId} not found.`);
+        }
+        if (driver.status !== 'ON_TRIP') {
+          throw new BusinessRuleViolationError(
+            'DRIVER_NOT_ON_TRIP',
+            `Driver ${driver.full_name} is not currently on a trip and cannot be cancelled.`,
+            'driver_id'
+          );
+        }
+      }
 
       const beforeTrip = { status: trip.status };
       await repo.cancelTrip(conn, tripId, vehicleId, driverId);
