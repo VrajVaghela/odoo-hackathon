@@ -108,9 +108,10 @@ async function main() {
       { registration_number: 'KA-01-AE-5555', name: 'City Delivery Van 5', model: 'Mahindra Supro', vehicle_type: 'VAN', max_capacity_kg: 500.00, odometer_km: 210000.00, acquisition_cost: 12000.00, status: 'RETIRED', region: 'West' }
     ];
     for (const v of vehicles) {
+      const retiredAt = v.status === 'RETIRED' ? '2026-07-01 00:00:00' : null;
       await connection.query(
-        'INSERT INTO vehicles (registration_number, name, model, vehicle_type, max_capacity_kg, odometer_km, acquisition_cost, status, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);',
-        [v.registration_number, v.name, v.model, v.vehicle_type, v.max_capacity_kg, v.odometer_km, v.acquisition_cost, v.status, v.region]
+        'INSERT INTO vehicles (registration_number, name, model, vehicle_type, max_capacity_kg, odometer_km, acquisition_cost, status, region, retired_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
+        [v.registration_number, v.name, v.model, v.vehicle_type, v.max_capacity_kg, v.odometer_km, v.acquisition_cost, v.status, v.region, retiredAt]
       );
     }
 
@@ -121,7 +122,8 @@ async function main() {
       { full_name: 'Jane Smith', licence_number: 'DL-22222', licence_category: 'LIGHT', licence_expiry_date: '2027-06-30', contact_number: '+91 9999977777', safety_score: 88.00, status: 'AVAILABLE' },
       { full_name: 'Bob Johnson', licence_number: 'DL-33333', licence_category: 'LIGHT', licence_expiry_date: '2027-09-30', contact_number: '+91 9999966666', safety_score: 92.00, status: 'ON_TRIP' },
       { full_name: 'Alice Brown', licence_number: 'DL-44444', licence_category: 'HEAVY', licence_expiry_date: '2028-03-31', contact_number: '+91 9999955555', safety_score: 45.00, status: 'SUSPENDED' },
-      { full_name: 'Charlie Green', licence_number: 'DL-55555', licence_category: 'LIGHT', licence_expiry_date: '2026-06-01', contact_number: '+91 9999944444', safety_score: 85.00, status: 'AVAILABLE' }
+      { full_name: 'Charlie Green', licence_number: 'DL-55555', licence_category: 'LIGHT', licence_expiry_date: '2026-06-01', contact_number: '+91 9999944444', safety_score: 85.00, status: 'AVAILABLE' },
+      { full_name: 'Priya Nair', licence_number: 'DL-66666', licence_category: 'HEAVY', licence_expiry_date: '2027-11-30', contact_number: '+91 9999933333', safety_score: 90.00, status: 'OFF_DUTY' }
     ];
     for (const d of drivers) {
       await connection.query(
@@ -148,10 +150,20 @@ async function main() {
       'INSERT INTO trips (trip_code, source, destination, vehicle_id, driver_id, cargo_weight_kg, planned_distance_km, status, revenue, dispatched_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);',
       ['TRP-102', 'Warehouse B', 'Store C', v3.id, d3.id, 700.00, 250.00, 'DISPATCHED', 800.00, '2026-07-12 09:00:00']
     );
-    // Draft trip
+    // Valid dispatch scenario: fits the available van's 800 kg capacity.
     await connection.query(
       'INSERT INTO trips (trip_code, source, destination, cargo_weight_kg, planned_distance_km, status) VALUES (?, ?, ?, ?, ?, ?);',
       ['TRP-103', 'Warehouse A', 'Store D', 600.00, 180.00, 'DRAFT']
+    );
+    // Capacity boundary scenario: cargo exactly equals the available van's capacity.
+    await connection.query(
+      'INSERT INTO trips (trip_code, source, destination, cargo_weight_kg, planned_distance_km, status) VALUES (?, ?, ?, ?, ?, ?);',
+      ['TRP-104', 'Warehouse C', 'Store E', 800.00, 220.00, 'DRAFT']
+    );
+    // Capacity rejection scenario: cargo is 1 kg above the available van's capacity.
+    await connection.query(
+      'INSERT INTO trips (trip_code, source, destination, cargo_weight_kg, planned_distance_km, status) VALUES (?, ?, ?, ?, ?, ?);',
+      ['TRP-105', 'Warehouse D', 'Store F', 801.00, 240.00, 'DRAFT']
     );
 
     // Retrieve completed trip ID

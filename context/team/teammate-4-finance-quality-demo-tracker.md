@@ -2,7 +2,7 @@
 
 Owner name: ____________________  
 Branch: feat/finance-reports  
-Status: Not started / In progress / Blocked / Ready for integration  
+Status: In progress
 Primary responsibility: fuel/expense/reporting modules, analytics UI, deterministic scenarios, test evidence, and demo readiness.
 
 ## Definition of done
@@ -11,6 +11,13 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 - CSV export matches the on-screen report query.
 - The demo can reset and run twice without manual database edits.
 - The team has a concise explanation for database, logic, UX, and quality evidence.
+
+## Current Phase 2 evidence - 2026-07-12
+
+- Purposeful reset scenarios now include an off-duty driver, an exact-capacity draft (`TRP-104`), and a one-kilogram-over-capacity draft (`TRP-105`).
+- The dispatch-rule test stubs have been replaced with typed API checks for capacity rollback, boundary acceptance, atomic resource/audit updates, invalid trip status, vehicle conflicts, and driver compliance conflicts.
+- Independently calculated fresh-seed baseline: 2 available, 1 on-trip, 1 in-shop, and 1 retired vehicle; backend active-fleet utilisation is 25%; 2 drivers are dispatch-eligible; 3 trips are pending dispatch; fuel cost is INR 4,500 and toll expense is INR 350.
+- Static type checks and production builds pass. Fresh reset succeeded, the complete API suite passed 16/16 checks, and the live dashboard read model matched the calculated baseline; see `teammate-4-phase2-defects.md` for the integration defect recorded so far.
 
 ## Phase 0 - 00:00-00:25
 
@@ -27,10 +34,10 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Phase 2 - 01:35-03:50
 
-- [ ] Implement deterministic seed/reset script with purposeful records.
-- [ ] Write dispatch API tests for happy path and each rejection from Teammate 3 rule matrix.
-- [ ] Verify dashboard values against direct expected seed totals.
-- [ ] Record concise defect reports with reproduction steps during integration.
+- [x] Implement deterministic seed/reset script with purposeful records.
+- [x] Write dispatch API tests for happy path and each rejection from Teammate 3 rule matrix.
+- [x] Verify dashboard values against direct expected seed totals.
+- [x] Record concise defect reports with reproduction steps during integration.
 
 ## Phase 3 - 03:50-05:35
 
