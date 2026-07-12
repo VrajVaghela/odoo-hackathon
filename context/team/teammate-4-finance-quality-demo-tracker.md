@@ -21,9 +21,9 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Current Phase 3 integration note - 2026-07-12
 
-- Finance and reporting modules, their tokenised UI feature modules, and reusable `CostSummary`/`SimpleBarChart` components are in progress and compile successfully.
-- Direct MySQL service verification confirmed fuel/expense persistence, audit-backed writes, operational-cost aggregation, fuel efficiency, ROI, and CSV generation.
-- Shared registration remains intentionally pending with Teammate 1: mount `finance/routes.ts` at `/api/v1/finance`, mount `reports/routes.ts` at `/api/v1/reports`, and replace the `finance`/`reports` placeholders in `App.tsx` with `FinancePage`/`ReportsPage`.
+- Finance and reporting modules, their tokenised UI feature modules, and reusable `CostSummary`/`SimpleBarChart` components are complete and compile successfully.
+- End-to-end Financial Analyst verification confirmed authenticated fuel/expense writes, audit-backed persistence, operational-cost aggregation, fuel efficiency, ROI, report CSV export, and refreshed finance/report views.
+- Shared routes are mounted at `/api/v1/finance` and `/api/v1/reports`; Financial Analyst navigation now renders `FinancePage` and `ReportsPage`.
 
 ## Phase 0 - 00:00-00:25
 
@@ -47,12 +47,12 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Phase 3 - 03:50-05:35
 
-- [ ] Implement fuel log create/list validation.
-- [ ] Implement expense create/list validation.
-- [ ] Implement report aggregation for fuel efficiency, fleet utilisation, operational cost, and ROI.
-- [ ] Implement server-side CSV export from report data.
-- [ ] Build finance and analytics screens using shared components.
-- [ ] Build tokenised simple bar/cost visuals and accessible text summaries.
+- [x] Implement fuel log create/list validation.
+- [x] Implement expense create/list validation.
+- [x] Implement report aggregation for fuel efficiency, fleet utilisation, operational cost, and ROI.
+- [x] Implement server-side CSV export from report data.
+- [x] Build finance and analytics screens using shared components.
+- [x] Build tokenised simple bar/cost visuals and accessible text summaries.
 
 ## Phase 4 - 05:35-06:45
 

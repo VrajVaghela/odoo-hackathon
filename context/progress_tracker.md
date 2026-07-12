@@ -43,13 +43,13 @@ Verification note (2026-07-12): Teammate 4 reset the local database successfully
 - [x] Trip cancellation restores availability safely.
 - [x] Open maintenance sets vehicle to In Shop.
 - [x] Close maintenance restores vehicle to Available unless retired.
-- [ ] Fuel logging persists liters, cost, date, vehicle, and optional trip.
-- [ ] Expense logging persists category, amount, date, vehicle/trip.
+- [x] Fuel logging persists liters, cost, date, vehicle, and optional trip.
+- [x] Expense logging persists category, amount, date, vehicle/trip.
 - [x] Dashboard refreshes after domain mutations.
-- [ ] Fuel efficiency report derives from persisted data.
-- [ ] Operational cost report derives from fuel, maintenance, and expense data.
-- [ ] ROI report derives from revenue, fuel, maintenance, and acquisition cost.
-- [ ] CSV export is correct and downloaded locally.
+- [x] Fuel efficiency report derives from persisted data.
+- [x] Operational cost report derives from fuel, maintenance, and expense data.
+- [x] ROI report derives from revenue, fuel, maintenance, and acquisition cost.
+- [x] CSV export is correct and downloaded locally.
 - [x] State-changing actions create audit records.
 
 Verification note (2026-07-12): Maintenance open/close transactions are implemented with vehicle row locks, IN_SHOP/AVAILABLE/RETIRED transitions, and audit events; the maintenance router is registered at `/api/v1/maintenance`. Frontend Phase 2 screens (dashboard, vehicles, drivers, trips) are built against the live API with role-aware navigation and a no-permission screen. Remaining Phase 3 work is finance-owned: fuel/expense persistence, the fuel-efficiency/operational-cost/ROI reports, and CSV export (the Maintenance, Fuel & Expenses, and Analytics screens are still placeholders). Defect D4-P2-001 (dashboard client aggregates role-restricted registry endpoints instead of `/api/v1/dashboard`) remains open.
