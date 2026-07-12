@@ -171,36 +171,10 @@ const App: React.FC = () => {
         return <MaintenancePage />;
 
       case 'finance':
-        return <FinancePage />; /* Previous Phase 3 placeholder retained below for minimal shared-file integration. */
-        /* return (
-          <div style={containerStyle}>
-            <PageHeader
-              title="Fuel & Expense Ledger"
-              description="Track operational costs, tolls, and refueling logs."
-            />
-            <EmptyState
-              icon="💰"
-              title="Coming in Phase 3"
-              description="Fuel logs, expense entries, and cost tracking will be available once Phase 3 is completed."
-            />
-          </div>
-        ); */
+        return <FinancePage />;
 
       case 'reports':
-        return <ReportsPage />; /* Previous Phase 3 placeholder retained below for minimal shared-file integration. */
-        /* return (
-          <div style={containerStyle}>
-            <PageHeader
-              title="Analytics Reports"
-              description="Analyze fuel efficiency, fleet utilization, and ROI."
-            />
-            <EmptyState
-              icon="📊"
-              title="Coming in Phase 3"
-              description="Fleet ROI analysis, fuel efficiency reports, and CSV export will be enabled in Phase 3."
-            />
-          </div>
-        ); */
+        return <ReportsPage />;
 
       default:
         return (

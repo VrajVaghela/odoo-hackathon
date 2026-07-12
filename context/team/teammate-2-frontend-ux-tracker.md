@@ -53,6 +53,26 @@ Progress note (2026-07-12): Phase 4 frontend hardening completed for the shell, 
 
 ## Handoff checklist
 
-- [ ] Document each shared component’s props/usage in ui_registry.md.
-- [ ] Provide test path for each screen.
-- [ ] Update shared progress tracker.
+- [x] Document each shared component’s props/usage in ui_registry.md.
+- [x] Provide test path for each screen.
+- [x] Update shared progress tracker.
+
+### Screen Test Paths & Credentials
+All frontend paths require local user login. Role access boundaries are enforced client-side via `App.tsx` and validated server-side by API middleware.
+
+| Page / Screen | Role Required | Path Description / Access Actions |
+| --- | --- | --- |
+| **Login Console** | Any role / Guest | Root view (`http://localhost:3000/`) |
+| **Dashboard** | Fleet Manager, Dispatcher | Auto-redirects on login. Click navigation options. |
+| **Fleet Registry** | Fleet Manager | Select `Fleet Registry` from the Sidebar. View vehicles, filter list, or click "+ Add Vehicle". |
+| **Maintenance Board** | Fleet Manager | Select `Maintenance` from the Sidebar. Open/close repair logs. |
+| **Trips & Dispatch** | Dispatcher | Select `Trips & Dispatch` from the Sidebar. Create drafts or assign available drivers/vehicles. |
+| **Drivers & Safety** | Safety Officer | Select `Drivers & Safety` from the Sidebar. Register drivers, view compliance & safety scores. |
+| **Fuel & Expenses** | Financial Analyst | Select `Fuel & Expenses` from the Sidebar. Log refuel logs or tolls. |
+| **Analytics Reports** | Financial Analyst | Select `Analytics` from the Sidebar. View utilization, cost breakdown, and click "Export CSV". |
+
+#### Quick-Login Accounts (Password for all: `password123`)
+- **Fleet Manager:** `manager@transitops.com`
+- **Dispatcher:** `dispatcher@transitops.com`
+- **Safety Officer:** `safety@transitops.com`
+- **Financial Analyst:** `finance@transitops.com`

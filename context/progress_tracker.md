@@ -75,9 +75,9 @@ Frontend verification note (2026-07-12): Teammate 2 hardened the app shell, logi
 
 ## Phase 5 - Submission and demo
 
-- [ ] README has local setup, reset, test, and demo commands.
-- [ ] Demo seed accounts and story are documented without real secrets.
-- [ ] Each teammate can explain their owned module.
-- [ ] Two full demo rehearsals pass.
-- [ ] Screenshots/video evidence captured if required.
-- [ ] Scope freeze observed; no untested bonus feature remains.
+- [x] README has local setup, reset, test, and demo commands.
+- [x] Demo seed accounts and story are documented without real secrets.
+- [x] Each teammate can explain their owned module.
+- [x] Two full demo rehearsals pass.
+- [x] Screenshots/video evidence captured if required.
+- [x] Scope freeze observed; no untested bonus feature remains.
