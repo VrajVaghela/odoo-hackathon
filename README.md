@@ -1,4 +1,4 @@
-﻿# TransitOps – Smart Transport Operations Platform
+# TransitOps – Smart Transport Operations Platform
 
 ## Overview
 
@@ -29,11 +29,12 @@ The solution focuses on core transport operations use cases, including:
 
 ## Tech Stack
 
-- **Frontend:** Next.js, Tailwind CSS
-- **Backend:** Node.js, Next.js API Routes
-- **Database:** MySQL
-- **Authentication:** JWT
-- **Charts & Analytics:** Recharts
+- **Frontend:** React + Vite + TypeScript (Vanilla CSS styling with `ui_tokens.md` values)
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** Local MySQL 8 with `mysql2/promise` connection pool
+- **Authentication:** Local opaque session stored in MySQL; Node crypto password hashing
+- **Charts & Analytics:** Native SVG/CSS charts and server-generated CSV
+- **Test Runner:** Built-in Node.js test runner (`node --test`)
 
 ## Goal
 

@@ -4,11 +4,11 @@ Rule: update this file and the relevant individual tracker immediately after a f
 
 ## Phase 0 - Alignment
 
-- [ ] Scope locked to the MVP and cut list agreed.
-- [ ] Demo script and seeded scenarios agreed.
-- [ ] MySQL schema and transaction plan reviewed by all four teammates.
-- [ ] API input/output contract agreed.
-- [ ] UI tokens and reusable component plan agreed.
+- [x] Scope locked to the MVP and cut list agreed.
+- [x] Demo script and seeded scenarios agreed.
+- [x] MySQL schema and transaction plan reviewed by all four teammates.
+- [x] API input/output contract agreed.
+- [x] UI tokens and reusable component plan agreed.
 
 ## Phase 1 - Foundation
 

@@ -14,9 +14,9 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Phase 0 - 00:00-00:25
 
-- [ ] Define exact seeded scenarios: available, on-trip, in-shop, retired, expired licence, suspended, capacity failure, completed trip, and finance records.
-- [ ] Define expected KPI, fuel-efficiency, operational-cost, and ROI values.
-- [ ] Draft demo narrative and evidence checklist.
+- [x] Define exact seeded scenarios: available, on-trip, in-shop, retired, expired licence, suspended, capacity failure, completed trip, and finance records.
+- [x] Define expected KPI, fuel-efficiency, operational-cost, and ROI values.
+- [x] Draft demo narrative and evidence checklist.
 
 ## Phase 1 - 00:25-01:35
 
