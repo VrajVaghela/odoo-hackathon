@@ -33,3 +33,4 @@ This is a living catalogue. Before adding a UI element, check whether an existin
 | Date/time | Component | Change | Owner | Consumers |
 | --- | --- | --- | --- | --- |
 | 2026-07-12 | AppShell, StatusBadge, MetricCard, FormField, ErrorAlert, ConfirmDialog | Initialized reusable primitives & layout | Teammate 2 | Auth, Dashboard, Vehicles, Drivers, Trips, Maintenance, Finance |
+| 2026-07-12 | TripLifecycle, DispatchEligibilityNotice | Phase 2 — trip lifecycle stepper and dispatch conflict notice components | Teammate 3 | TripsPage |

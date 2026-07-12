@@ -28,12 +28,12 @@ Rule: update this file and the relevant individual tracker immediately after a f
 - [ ] Driver registry create/list/filter/edit works.
 - [ ] Licence expiry/suspended statuses are visible.
 - [ ] Dashboard KPI query and filters work.
-- [ ] Trip draft/create works.
-- [ ] Capacity validation blocks invalid dispatch.
-- [ ] Expired/suspended/unavailable driver validation blocks dispatch.
-- [ ] Retired/in-shop/on-trip vehicle validation blocks dispatch.
-- [ ] Dispatch transaction updates trip, vehicle, and driver atomically.
-- [ ] Dispatch conflicts return clear, testable error codes.
+- [x] Trip draft/create works.
+- [x] Capacity validation blocks invalid dispatch.
+- [x] Expired/suspended/unavailable driver validation blocks dispatch.
+- [x] Retired/in-shop/on-trip vehicle validation blocks dispatch.
+- [x] Dispatch transaction updates trip, vehicle, and driver atomically.
+- [x] Dispatch conflicts return clear, testable error codes.
 
 ## Phase 3 - Lifecycle and insight
 

@@ -3,6 +3,7 @@ import { LoginForm } from './features/auth/LoginForm.tsx';
 import { AppShell } from './components/AppShell.tsx';
 import { MetricCard } from './components/MetricCard.tsx';
 import { StatusBadge } from './components/StatusBadge.tsx';
+import { TripsPage } from './features/trips/TripsPage.tsx';
 
 interface UserSession {
   email: string;
@@ -171,20 +172,7 @@ const App: React.FC = () => {
         );
 
       case 'trips':
-        return (
-          <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Trips & Dispatched Jobs</h2>
-              <p style={pageDescStyle}>Plan routes, dispatch trips, and monitor active assignments.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Dispatched Trip Lifecycle</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Seeded trips and active dispatch operations will display here once Phase 2 is completed.
-              </p>
-            </div>
-          </div>
-        );
+        return <TripsPage userRole={user.role} />;
 
       case 'maintenance':
         return (

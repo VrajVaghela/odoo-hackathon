@@ -27,14 +27,14 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 
 ## Phase 2 - 01:35-03:50
 
-- [ ] Implement trip draft/create.
-- [ ] Implement dispatch transaction with vehicle/driver row locks.
-- [ ] Reject cargo above capacity.
-- [ ] Reject retired/in-shop/on-trip vehicle.
-- [ ] Reject expired/suspended/on-trip/non-available driver.
-- [ ] Reject vehicle/driver double assignment.
-- [ ] Update trip, vehicle, and driver status atomically.
-- [ ] Build trip dispatcher form, eligibility messages, lifecycle component, and live board.
+- [x] Implement trip draft/create.
+- [x] Implement dispatch transaction with vehicle/driver row locks.
+- [x] Reject cargo above capacity.
+- [x] Reject retired/in-shop/on-trip vehicle.
+- [x] Reject expired/suspended/on-trip/non-available driver.
+- [x] Reject vehicle/driver double assignment.
+- [x] Update trip, vehicle, and driver status atomically.
+- [x] Build trip dispatcher form, eligibility messages, lifecycle component, and live board.
 
 ## Phase 3 - 03:50-05:35
 

@@ -1,72 +1,216 @@
 import { withTransaction } from '../../db/transaction.js';
-import { TRIP_STATUS, TripStatus } from './types.js';
 import { BusinessRuleViolationError, ResourceNotFoundError } from '../../shared/errors/index.js';
+import { TripRepository } from './repository.js';
+import { Trip, TRIP_STATUS } from './types.js';
+import { CreateTripInput, DispatchTripInput } from './validator.js';
+
+const repo = new TripRepository();
 
 export class TripService {
   /**
-   * Drafts a new trip.
+   * Creates a new DRAFT trip record.
    */
-  async createDraft(input: any): Promise<any> {
-    // Pseudocode / Skeleton:
-    // 1. Validate basic input fields (source, destination, cargo_weight_kg, planned_distance_km)
-    // 2. Insert record into `trips` table with status = 'DRAFT'
-    // 3. Return created trip details
-    return { id: 1, ...input, status: TRIP_STATUS.DRAFT };
-  }
-
-  /**
-   * Dispatches an existing trip. Performs resource checks under lock.
-   */
-  async dispatchTrip(tripId: number, vehicleId: number, driverId: number): Promise<void> {
-    // Transaction logic boundary:
-    await withTransaction(async (connection) => {
-      // 1. Lock the vehicle, driver, and trip rows with SELECT FOR UPDATE:
-      //    SELECT status, max_capacity_kg FROM vehicles WHERE id = ? FOR UPDATE;
-      //    SELECT status, licence_expiry_date FROM drivers WHERE id = ? FOR UPDATE;
-      //    SELECT status, cargo_weight_kg FROM trips WHERE id = ? FOR UPDATE;
-      
-      // 2. Re-read and validate states inside the transaction:
-      //    - Reject if vehicle status !== 'AVAILABLE' -> VEHICLE_NOT_AVAILABLE
-      //    - Reject if driver status !== 'AVAILABLE' -> DRIVER_NOT_AVAILABLE
-      //    - Reject if driver licence has expired -> DRIVER_LICENCE_EXPIRED
-      //    - Reject if trip status !== 'DRAFT' -> INVALID_TRIP_STATUS
-      //    - Reject if trip cargo_weight_kg > vehicle.max_capacity_kg -> CARGO_EXCEEDS_CAPACITY
-      
-      // 3. Perform the state updates:
-      //    - Set vehicle status = 'ON_TRIP'
-      //    - Set driver status = 'ON_TRIP'
-      //    - Set trip status = 'DISPATCHED', vehicle_id = ?, driver_id = ?, dispatched_at = NOW()
-      
-      // 4. Log audit log entry:
-      //    - INSERT INTO audit_logs (entity_type, entity_id, action, before_json, after_json)
+  async createDraft(input: CreateTripInput, actorUserId: number | null): Promise<Trip> {
+    return withTransaction(async (conn) => {
+      const tripCode = await repo.generateTripCode(conn);
+      const tripId = await repo.insertDraft(
+        conn,
+        tripCode,
+        input.source,
+        input.destination,
+        input.cargo_weight_kg,
+        input.planned_distance_km,
+        input.revenue ?? 0
+      );
+      await repo.insertAuditLog(conn, actorUserId, 'trip', tripId, 'TRIP_CREATED', null, {
+        trip_code: tripCode,
+        status: TRIP_STATUS.DRAFT,
+        source: input.source,
+        destination: input.destination,
+        cargo_weight_kg: input.cargo_weight_kg,
+      });
+      const trip = await repo.findByIdForUpdate(conn, tripId);
+      return trip!;
     });
   }
 
   /**
-   * Completes a dispatched trip.
+   * Dispatches a DRAFT trip with full business-rule validation under row locks.
+   *
+   * Rules enforced (all under SELECT FOR UPDATE):
+   *  - Trip must be in DRAFT status.
+   *  - Vehicle must be AVAILABLE (not RETIRED, IN_SHOP, ON_TRIP).
+   *  - Driver must be AVAILABLE (not SUSPENDED, OFF_DUTY, ON_TRIP).
+   *  - Driver licence must not be expired.
+   *  - Vehicle capacity must not be exceeded by cargo weight.
+   *  - Vehicle and driver must not be the same as another current dispatch (prevented by status lock).
    */
-  async completeTrip(tripId: number, actualDistanceKm: number, fuelLiters?: number, fuelCost?: number): Promise<void> {
-    await withTransaction(async (connection) => {
-      // 1. Lock trip and associated vehicle/driver rows FOR UPDATE
-      // 2. Validate trip is status = 'DISPATCHED'
-      // 3. Update vehicle odometer: vehicle.odometer_km = vehicle.odometer_km + actualDistanceKm
-      // 4. Set vehicle and driver status = 'AVAILABLE'
-      // 5. Set trip status = 'COMPLETED', actual_distance_km = ?, completed_at = NOW()
-      // 6. Optional: Insert fuel log and expense entries
-      // 7. Write audit log
+  async dispatchTrip(
+    tripId: number,
+    input: DispatchTripInput,
+    actorUserId: number | null
+  ): Promise<Trip> {
+    return withTransaction(async (conn) => {
+      // Lock all three rows before reading state
+      const trip = await repo.findByIdForUpdate(conn, tripId);
+      if (!trip) {
+        throw new ResourceNotFoundError(`Trip ${tripId} not found.`);
+      }
+
+      const vehicle = await repo.findVehicleForUpdate(conn, input.vehicle_id);
+      if (!vehicle) {
+        throw new ResourceNotFoundError(`Vehicle ${input.vehicle_id} not found.`);
+      }
+
+      const driver = await repo.findDriverForUpdate(conn, input.driver_id);
+      if (!driver) {
+        throw new ResourceNotFoundError(`Driver ${input.driver_id} not found.`);
+      }
+
+      // --- Business rule checks (server is authoritative) ---
+
+      // 1. Trip must be DRAFT
+      if (trip.status !== TRIP_STATUS.DRAFT) {
+        throw new BusinessRuleViolationError(
+          'INVALID_TRIP_STATUS',
+          `Trip ${trip.trip_code} is in ${trip.status} status and cannot be dispatched.`
+        );
+      }
+
+      // 2. Vehicle eligibility
+      if (vehicle.status === 'RETIRED') {
+        throw new BusinessRuleViolationError(
+          'VEHICLE_RETIRED',
+          `Vehicle ${vehicle.registration_number} is retired and cannot be dispatched.`,
+          'vehicle_id'
+        );
+      }
+      if (vehicle.status === 'IN_SHOP') {
+        throw new BusinessRuleViolationError(
+          'VEHICLE_IN_SHOP',
+          `Vehicle ${vehicle.registration_number} is currently in the shop for maintenance.`,
+          'vehicle_id'
+        );
+      }
+      if (vehicle.status === 'ON_TRIP') {
+        throw new BusinessRuleViolationError(
+          'VEHICLE_ON_TRIP',
+          `Vehicle ${vehicle.registration_number} is already on an active trip.`,
+          'vehicle_id'
+        );
+      }
+      if (vehicle.status !== 'AVAILABLE') {
+        throw new BusinessRuleViolationError(
+          'VEHICLE_NOT_AVAILABLE',
+          `Vehicle ${vehicle.registration_number} is not available for dispatch.`,
+          'vehicle_id'
+        );
+      }
+
+      // 3. Driver eligibility
+      if (driver.status === 'SUSPENDED') {
+        throw new BusinessRuleViolationError(
+          'DRIVER_SUSPENDED',
+          `Driver ${driver.full_name} is suspended and cannot be assigned.`,
+          'driver_id'
+        );
+      }
+      if (driver.status === 'OFF_DUTY') {
+        throw new BusinessRuleViolationError(
+          'DRIVER_OFF_DUTY',
+          `Driver ${driver.full_name} is currently off duty.`,
+          'driver_id'
+        );
+      }
+      if (driver.status === 'ON_TRIP') {
+        throw new BusinessRuleViolationError(
+          'DRIVER_ON_TRIP',
+          `Driver ${driver.full_name} is already assigned to an active trip.`,
+          'driver_id'
+        );
+      }
+      if (driver.status !== 'AVAILABLE') {
+        throw new BusinessRuleViolationError(
+          'DRIVER_NOT_AVAILABLE',
+          `Driver ${driver.full_name} is not available for dispatch.`,
+          'driver_id'
+        );
+      }
+
+      // 4. Licence expiry check
+      const expiryDate = new Date(driver.licence_expiry_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (expiryDate < today) {
+        throw new BusinessRuleViolationError(
+          'DRIVER_LICENCE_EXPIRED',
+          `Driver ${driver.full_name}'s licence expired on ${driver.licence_expiry_date}. A valid licence is required.`,
+          'driver_id'
+        );
+      }
+
+      // 5. Cargo capacity check
+      const cargoKg = Number(trip.cargo_weight_kg);
+      const capacityKg = Number(vehicle.max_capacity_kg);
+      if (cargoKg > capacityKg) {
+        const over = (cargoKg - capacityKg).toFixed(2);
+        throw new BusinessRuleViolationError(
+          'CARGO_EXCEEDS_CAPACITY',
+          `Cargo is ${over} kg over ${vehicle.registration_number}'s ${capacityKg} kg capacity.`,
+          'cargo_weight_kg'
+        );
+      }
+
+      // --- All checks passed: perform atomic state update ---
+      const beforeTrip = { status: trip.status, vehicle_id: trip.vehicle_id, driver_id: trip.driver_id };
+      await repo.dispatchTrip(conn, tripId, input.vehicle_id, input.driver_id);
+
+      // Audit: trip
+      await repo.insertAuditLog(conn, actorUserId, 'trip', tripId, 'TRIP_DISPATCHED', beforeTrip, {
+        status: TRIP_STATUS.DISPATCHED,
+        vehicle_id: input.vehicle_id,
+        driver_id: input.driver_id,
+      });
+      // Audit: vehicle
+      await repo.insertAuditLog(conn, actorUserId, 'vehicle', input.vehicle_id, 'VEHICLE_STATUS_CHANGED', {
+        status: vehicle.status,
+      }, { status: 'ON_TRIP' });
+      // Audit: driver
+      await repo.insertAuditLog(conn, actorUserId, 'driver', input.driver_id, 'DRIVER_STATUS_CHANGED', {
+        status: driver.status,
+      }, { status: 'ON_TRIP' });
+
+      const updated = await repo.findByIdForUpdate(conn, tripId);
+      return updated!;
     });
   }
 
   /**
-   * Cancels a dispatched trip.
+   * Lists trips, optionally filtered by status.
    */
-  async cancelTrip(tripId: number): Promise<void> {
-    await withTransaction(async (connection) => {
-      // 1. Lock trip, vehicle, and driver rows FOR UPDATE
-      // 2. Validate trip is status = 'DISPATCHED' or 'DRAFT'
-      // 3. Set vehicle and driver status = 'AVAILABLE'
-      // 4. Set trip status = 'CANCELLED'
-      // 5. Write audit log
-    });
+  async listTrips(status?: string): Promise<Trip[]> {
+    return repo.listTrips(status);
+  }
+
+  /**
+   * Fetches a single trip by id.
+   */
+  async getTrip(id: number): Promise<Trip> {
+    const trip = await repo.findById(id);
+    if (!trip) {
+      throw new ResourceNotFoundError(`Trip ${id} not found.`);
+    }
+    return trip;
+  }
+
+  /**
+   * Returns available vehicles and drivers for the dispatch form.
+   */
+  async getDispatchOptions(): Promise<{ vehicles: any[]; drivers: any[] }> {
+    const [vehicles, drivers] = await Promise.all([
+      repo.listAvailableVehicles(),
+      repo.listAvailableDrivers(),
+    ]);
+    return { vehicles, drivers };
   }
 }

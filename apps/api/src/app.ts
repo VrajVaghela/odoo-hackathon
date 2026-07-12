@@ -4,6 +4,7 @@ import { errorHandler } from './middleware/error.js';
 import authRouter from './modules/auth/routes.js';
 import vehicleRouter from './modules/vehicles/routes.js';
 import driverRouter from './modules/drivers/routes.js';
+import tripRouter from './modules/trips/routes.js';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/vehicles', vehicleRouter);
 app.use('/api/v1/drivers', driverRouter);
+app.use('/api/v1/trips', tripRouter);
 
 // Health check endpoint
 app.get('/api/v1/health', (_req, res) => {
