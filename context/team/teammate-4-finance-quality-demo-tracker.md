@@ -19,6 +19,12 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 - Independently calculated fresh-seed baseline: 2 available, 1 on-trip, 1 in-shop, and 1 retired vehicle; backend active-fleet utilisation is 25%; 2 drivers are dispatch-eligible; 3 trips are pending dispatch; fuel cost is INR 4,500 and toll expense is INR 350.
 - Static type checks and production builds pass. Fresh reset succeeded, the complete API suite passed 16/16 checks, and the live dashboard read model matched the calculated baseline; see `teammate-4-phase2-defects.md` for the integration defect recorded so far.
 
+## Current Phase 3 integration note - 2026-07-12
+
+- Finance and reporting modules, their tokenised UI feature modules, and reusable `CostSummary`/`SimpleBarChart` components are in progress and compile successfully.
+- Direct MySQL service verification confirmed fuel/expense persistence, audit-backed writes, operational-cost aggregation, fuel efficiency, ROI, and CSV generation.
+- Shared registration remains intentionally pending with Teammate 1: mount `finance/routes.ts` at `/api/v1/finance`, mount `reports/routes.ts` at `/api/v1/reports`, and replace the `finance`/`reports` placeholders in `App.tsx` with `FinancePage`/`ReportsPage`.
+
 ## Phase 0 - 00:00-00:25
 
 - [x] Define exact seeded scenarios: available, on-trip, in-shop, retired, expired licence, suspended, capacity failure, completed trip, and finance records.
