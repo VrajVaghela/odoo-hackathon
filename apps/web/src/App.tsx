@@ -1,14 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { LoginForm } from './features/auth/LoginForm.tsx';
 import { AppShell } from './components/AppShell.tsx';
-import { MetricCard } from './components/MetricCard.tsx';
-import { StatusBadge } from './components/StatusBadge.tsx';
+import { DashboardPage } from './features/dashboard/DashboardPage.tsx';
+import { VehiclesPage } from './features/vehicles/VehiclesPage.tsx';
+import { DriversPage } from './features/drivers/DriversPage.tsx';
 import { TripsPage } from './features/trips/TripsPage.tsx';
+import { PageHeader } from './components/PageHeader.tsx';
+import { EmptyState } from './components/EmptyState.tsx';
 
 interface UserSession {
   email: string;
   role: string;
 }
+
+/**
+ * Role → allowed page IDs mapping.
+ * This is the single source of truth for role-based page access.
+ */
+const ROLE_PAGES: Record<string, string[]> = {
+  FLEET_MANAGER: ['dashboard', 'vehicles', 'maintenance'],
+  DISPATCHER: ['dashboard', 'trips'],
+  SAFETY_OFFICER: ['drivers'],
+  FINANCIAL_ANALYST: ['finance', 'reports'],
+};
 
 const App: React.FC = () => {
   const [user, setUser] = useState<UserSession | null>(null);
@@ -34,10 +48,9 @@ const App: React.FC = () => {
 
     // Redirect to default view for role
     const role = session.role;
-    if (role === 'SAFETY_OFFICER') {
-      setCurrentPage('drivers');
-    } else if (role === 'FINANCIAL_ANALYST') {
-      setCurrentPage('finance');
+    const allowed = ROLE_PAGES[role] || [];
+    if (allowed.length > 0) {
+      setCurrentPage(allowed[0]);
     } else {
       setCurrentPage('dashboard');
     }
@@ -69,20 +82,68 @@ const App: React.FC = () => {
     );
   }
 
+  // Check if current page is allowed for user's role
+  const allowedPages = ROLE_PAGES[user.role] || [];
+  const hasPermission = allowedPages.includes(currentPage);
+
   // Render components based on pageId
   const renderPageContent = () => {
-    const pageHeaderStyle: React.CSSProperties = {
-      marginBottom: 'var(--space-6)',
-    };
-    const pageTitleStyle: React.CSSProperties = {
-      fontSize: 'var(--text-xl)',
-      fontWeight: 800,
-      marginBottom: 'var(--space-1)',
-    };
-    const pageDescStyle: React.CSSProperties = {
-      fontSize: 'var(--text-sm)',
-      color: 'var(--color-text-muted)',
-    };
+    // No-permission screen
+    if (!hasPermission) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'var(--space-10)',
+            textAlign: 'center',
+            gap: 'var(--space-4)',
+          }}>
+            <span style={{ fontSize: '3rem' }} aria-hidden="true">🔒</span>
+            <h2 style={{
+              fontSize: 'var(--text-xl)',
+              fontWeight: 800,
+              color: 'var(--color-text)',
+            }}>
+              Access Restricted
+            </h2>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--color-text-muted)',
+              maxWidth: '400px',
+              lineHeight: 'var(--leading-normal)',
+            }}>
+              Your role <strong style={{ color: 'var(--color-primary)' }}>{user.role.replace(/_/g, ' ')}</strong> does not have permission to access this section.
+              Use the sidebar to navigate to your authorized pages.
+            </p>
+            {allowedPages.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setCurrentPage(allowedPages[0])}
+                style={{
+                  height: 'var(--control-height)',
+                  padding: '0 var(--space-5)',
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-primary-contrast)',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: 'var(--text-sm)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-primary-hover)'; }}
+                onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'var(--color-primary)'; }}
+              >
+                Go to My Dashboard
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
 
     const containerStyle: React.CSSProperties = {
       display: 'flex',
@@ -92,84 +153,13 @@ const App: React.FC = () => {
 
     switch (currentPage) {
       case 'dashboard':
-        return (
-          <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Operations Control Overview</h2>
-              <p style={pageDescStyle}>Real-time metrics and active dispatches.</p>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
-              <MetricCard label="Active Vehicles" value="3" helperText="1 on trip, 1 in shop" statusToken="--color-info" />
-              <MetricCard label="Available Drivers" value="2" helperText="John Doe, Jane Smith" statusToken="--color-success" />
-              <MetricCard label="Pending Dispatches" value="1" helperText="TRP-103 is a draft" statusToken="--color-neutral" />
-              <MetricCard label="Fleet Utilisation" value="60%" helperText="Goal: 75% for Q3" statusToken="--color-primary" />
-            </div>
-
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Active Dispatch Board</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Seeded trips and active resource tracks will display here once Phase 2 is completed.
-              </p>
-            </div>
-          </div>
-        );
+        return <DashboardPage userRole={user.role} />;
 
       case 'vehicles':
-        return (
-          <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Fleet Registry</h2>
-              <p style={pageDescStyle}>Manage fleet assets, configurations, and lifecycle status.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Vehicles List</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Seeded vehicles and status trackers will display here once Phase 2 is completed.
-              </p>
-            </div>
-          </div>
-        );
+        return <VehiclesPage userRole={user.role} />;
 
       case 'drivers':
-        return (
-          <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Drivers Compliance Panel</h2>
-              <p style={pageDescStyle}>Track driver licenses, safety scores, and schedule status.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Seeded Drivers</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
-                This is a view showing initial seed drivers and compliance rules.
-              </p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                <div style={{ border: '1px solid var(--color-border)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>John Doe</div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>Licence: DL-11111 | Heavy | Expiry: 2027-12-31</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                    <span style={{ fontSize: 'var(--text-xs)', alignSelf: 'center', color: 'var(--color-success)' }}>Safety Score: 95</span>
-                    <StatusBadge status="AVAILABLE" />
-                  </div>
-                </div>
-
-                <div style={{ border: '1px solid var(--color-border)', padding: 'var(--space-3)', borderRadius: 'var(--radius-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>Charlie Green</div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>Licence: DL-55555 | Light | Expiry: 2026-06-01</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-danger)', fontWeight: 600 }}>Licence Expired</span>
-                    <StatusBadge status="AVAILABLE" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
+        return <DriversPage userRole={user.role} />;
 
       case 'trips':
         return <TripsPage userRole={user.role} />;
@@ -177,56 +167,59 @@ const App: React.FC = () => {
       case 'maintenance':
         return (
           <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Maintenance Logs</h2>
-              <p style={pageDescStyle}>Track shop orders, mechanical issues, and maintenance schedules.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Active Service Orders</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Vehicles currently checked into the shop will display here once Phase 3 is completed.
-              </p>
-            </div>
+            <PageHeader
+              title="Maintenance Logs"
+              description="Track shop orders, mechanical issues, and maintenance schedules."
+            />
+            <EmptyState
+              icon="🔧"
+              title="Coming in Phase 3"
+              description="Maintenance logging and shop status tracking will be available once Phase 3 is completed."
+            />
           </div>
         );
 
       case 'finance':
         return (
           <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Fuel & Expense Ledger</h2>
-              <p style={pageDescStyle}>Track operational costs, tolls, and refueling logs.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Refueling Logs & Tolls</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Seeded logs and ledger inputs will display here once Phase 3 is completed.
-              </p>
-            </div>
+            <PageHeader
+              title="Fuel & Expense Ledger"
+              description="Track operational costs, tolls, and refueling logs."
+            />
+            <EmptyState
+              icon="💰"
+              title="Coming in Phase 3"
+              description="Fuel logs, expense entries, and cost tracking will be available once Phase 3 is completed."
+            />
           </div>
         );
 
       case 'reports':
         return (
           <div style={containerStyle}>
-            <div style={pageHeaderStyle}>
-              <h2 style={pageTitleStyle}>Analytics Reports</h2>
-              <p style={pageDescStyle}>Analyze fuel efficiency, fleet utilization, and ROI.</p>
-            </div>
-            <div style={{ backgroundColor: 'var(--color-surface-raised)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: 'var(--space-5)' }}>
-              <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)' }}>Fleet ROI Analysis</h3>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--text-sm)' }}>
-                Native SVG reports and CSV export handlers will be enabled here in Phase 3.
-              </p>
-            </div>
+            <PageHeader
+              title="Analytics Reports"
+              description="Analyze fuel efficiency, fleet utilization, and ROI."
+            />
+            <EmptyState
+              icon="📊"
+              title="Coming in Phase 3"
+              description="Fleet ROI analysis, fuel efficiency reports, and CSV export will be enabled in Phase 3."
+            />
           </div>
         );
 
       default:
         return (
-          <div>
-            <h2>Console</h2>
-            <p>Page content not found.</p>
+          <div style={containerStyle}>
+            <PageHeader title="Page Not Found" description="The requested page does not exist." />
+            <EmptyState
+              icon="❓"
+              title="Unknown page"
+              description="Navigate using the sidebar menu."
+              actionLabel="Go to Dashboard"
+              onAction={() => setCurrentPage(allowedPages[0] || 'dashboard')}
+            />
           </div>
         );
     }
