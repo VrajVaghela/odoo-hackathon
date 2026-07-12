@@ -21,13 +21,13 @@ Primary responsibility: MySQL schema, local auth, vehicle/driver APIs, dashboard
 
 ## Phase 1 - 00:25-01:35
 
-- [ ] Create MySQL connection pool and transaction helper.
-- [ ] Create migrations for roles, users, sessions, vehicles, drivers, trips, maintenance logs, fuel logs, expenses, and audit logs.
-- [ ] Add foreign keys, unique constraints, checks, and the documented indexes.
-- [ ] Create deterministic seeds for roles, accounts, fleet assets, and drivers.
-- [ ] Implement health endpoint and central error middleware.
-- [ ] Implement password hash/verify, opaque session create/validate/destroy, and login attempt limiting.
-- [ ] Implement role middleware and current-user endpoint.
+- [x] Create MySQL connection pool and transaction helper.
+- [x] Create migrations for roles, users, sessions, vehicles, drivers, trips, maintenance logs, fuel logs, expenses, and audit logs.
+- [x] Add foreign keys, unique constraints, checks, and the documented indexes.
+- [x] Create deterministic seeds for roles, accounts, fleet assets, and drivers.
+- [x] Implement health endpoint and central error middleware.
+- [x] Implement password hash/verify, opaque session create/validate/destroy, and login attempt limiting.
+- [x] Implement role middleware and current-user endpoint.
 
 ## Phase 2 - 01:35-03:50
 

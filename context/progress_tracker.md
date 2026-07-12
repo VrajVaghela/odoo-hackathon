@@ -12,14 +12,14 @@ Rule: update this file and the relevant individual tracker immediately after a f
 
 ## Phase 1 - Foundation
 
-- [ ] Monorepo/app structure created.
-- [ ] Local MySQL connection configuration documented.
-- [ ] Ordered migrations created and run successfully.
-- [ ] Deterministic seed/reset script created.
-- [ ] Health endpoint responds.
-- [ ] Local login/session flow works.
-- [ ] RBAC middleware and role-aware navigation work.
-- [ ] App shell, token CSS, and reusable primitives render.
+- [x] Monorepo/app structure created.
+- [x] Local MySQL connection configuration documented.
+- [x] Ordered migrations created and run successfully.
+- [x] Deterministic seed/reset script created.
+- [x] Health endpoint responds.
+- [x] Local login/session flow works.
+- [x] RBAC middleware and role-aware navigation work.
+- [x] App shell, token CSS, and reusable primitives render.
 
 ## Phase 2 - Operational core
 

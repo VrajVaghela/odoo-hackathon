@@ -20,10 +20,10 @@ Primary responsibility: trip state machine, dispatch business rules, maintenance
 
 ## Phase 1 - 00:25-01:35
 
-- [ ] Define trip and maintenance state constants/types.
-- [ ] Define validators and typed domain error codes.
-- [ ] Draft service pseudocode for dispatch, complete, cancel, open maintenance, and close maintenance.
-- [ ] Prepare test fixtures using agreed seed identifiers.
+- [x] Define trip and maintenance state constants/types.
+- [x] Define validators and typed domain error codes.
+- [x] Draft service pseudocode for dispatch, complete, cancel, open maintenance, and close maintenance.
+- [x] Prepare test fixtures using agreed seed identifiers.
 
 ## Phase 2 - 01:35-03:50
 

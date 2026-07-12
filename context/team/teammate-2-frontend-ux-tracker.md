@@ -20,11 +20,11 @@ Primary responsibility: tokenised design system, responsive app shell, login, da
 
 ## Phase 1 - 00:25-01:35
 
-- [ ] Create token CSS and global base styles.
-- [ ] Create AppShell, role-aware Sidebar, TopBar, PageHeader, and route guard shell.
-- [ ] Create MetricCard, StatusBadge, DataTable, FilterBar, FormField, ErrorAlert, EmptyState, and ConfirmDialog.
-- [ ] Build login page with field validation, password visibility control, and failure feedback.
-- [ ] Register all reusable components in ui_registry.md.
+- [x] Create token CSS and global base styles.
+- [x] Create AppShell, role-aware Sidebar, TopBar, PageHeader, and route guard shell.
+- [x] Create MetricCard, StatusBadge, DataTable, FilterBar, FormField, ErrorAlert, EmptyState, and ConfirmDialog.
+- [x] Build login page with field validation, password visibility control, and failure feedback.
+- [x] Register all reusable components in ui_registry.md.
 
 ## Phase 2 - 01:35-03:50
 

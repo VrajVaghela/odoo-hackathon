@@ -32,4 +32,4 @@ This is a living catalogue. Before adding a UI element, check whether an existin
 
 | Date/time | Component | Change | Owner | Consumers |
 | --- | --- | --- | --- | --- |
-| Pending | Pending | Add entries as work completes. | Pending | Pending |
+| 2026-07-12 | AppShell, StatusBadge, MetricCard, FormField, ErrorAlert, ConfirmDialog | Initialized reusable primitives & layout | Teammate 2 | Auth, Dashboard, Vehicles, Drivers, Trips, Maintenance, Finance |

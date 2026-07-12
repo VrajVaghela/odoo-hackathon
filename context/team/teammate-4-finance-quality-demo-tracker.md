@@ -20,10 +20,10 @@ Primary responsibility: fuel/expense/reporting modules, analytics UI, determinis
 
 ## Phase 1 - 00:25-01:35
 
-- [ ] Create finance/report endpoint contract with Teammate 1.
-- [ ] Set up built-in test runner and test naming convention.
-- [ ] Prepare seed/reset verification checklist.
-- [ ] Draft analytics component requirements with Teammate 2.
+- [x] Create finance/report endpoint contract with Teammate 1.
+- [x] Set up built-in test runner and test naming convention.
+- [x] Prepare seed/reset verification checklist.
+- [x] Draft analytics component requirements with Teammate 2.
 
 ## Phase 2 - 01:35-03:50
 
