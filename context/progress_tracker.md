@@ -70,6 +70,8 @@ Verification note (2026-07-12): Maintenance open/close transactions are implemen
 
 Verification note (2026-07-12): Teammate 3 Phase 4 mandatory business-rule matrix was run against a reset MySQL seed before and after integration verification. `npm run test --workspace=apps/api` passed 20/20 both times, covering dispatch rejection/success rules, lifecycle completion/cancellation, maintenance open/close, RBAC-adjacent integration checks, and audit assertions. Additionally, Teammate 1 checked and confirmed SQL parameters, role middleware checks on routes, session/token logging exclusions, and verified the database indexes against the initial schema.
 
+Verification note (2026-07-12, Teammate 4): A clean `npm.cmd run db:reset` followed by `npm.cmd run test` passed 23/23 API checks. New finance/report evidence asserts the deterministic MySQL seed metrics (25% utilisation, INR 4,850 operational cost, -3.06% fleet ROI; completed van 10 km/L and -22% ROI) and CSV escaping/totals. Both API and web production builds pass. The database was reset again after verification so the seeded demo state is ready.
+
 ## Phase 5 - Submission and demo
 
 - [ ] README has local setup, reset, test, and demo commands.
